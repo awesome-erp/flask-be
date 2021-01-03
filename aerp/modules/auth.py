@@ -58,7 +58,7 @@ def set_user_data():
         "status": "success",
         "user_id": user.uid
     }
-    make_response(responseDict, 200)
+    return make_response(responseDict, 200)
 
 
 @authorization.route("/userInfo", methods=['GET', 'POST'])

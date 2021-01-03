@@ -27,7 +27,7 @@ class User(Base):
             raise BaseException("Invalid access Token")
 
     def setData(self, dob: str, phone: str, personal_email: str,
-                role: str, team_id: str, salary: float, organization: str,
+                role: str, team_id: str, organization: str,
                 name: Optional[str] = None):
         """
         Set User Data to the Data Base
