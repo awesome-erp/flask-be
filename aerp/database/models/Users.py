@@ -1,6 +1,6 @@
 from aerp.database.models.BaseModel import Base
 from firebase_admin import auth
-from aerp.database.dataValidity.Users import testAllInput, checkName, \
+from aerp.database.dataValidity.user_data_validity import testAllInput, checkName, \
                                              checkDOB, checkEmail, checkPhone
 from datetime import timedelta
 from typing import Optional

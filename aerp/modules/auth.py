@@ -1,7 +1,7 @@
 from datetime import timedelta
 from flask import Blueprint, make_response, request
 from aerp.database.models.Users import User
-from aerp.modules.utils.auth import clearDataForSet
+from aerp.modules.utils.auth_utils import clearDataForSet
 
 
 authorization = Blueprint("auth", __name__, static_folder='/static')
