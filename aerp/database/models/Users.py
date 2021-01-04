@@ -9,7 +9,7 @@ from typing import Optional
 class User(Base):
 
     def __init__(self, authToken: str):
-        self.database =      self.init_database().collection("user_profiles")
+        self.database = self.init_database().collection("user_profiles")
         self.authToken = authToken
         self.userClaims = self.getUserClaims()
         self.uid = self.userClaims["uid"]

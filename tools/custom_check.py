@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Set
 from zulint.custom_rules import RuleList
 
 MYPY = False
@@ -131,9 +131,7 @@ prose_style_rules = [
      'description': "Use Botserver instead of botserver or Botserver."},
 ]  # type: List[Rule]
 
-markdown_docs_length_exclude = {
-    "zulip_bots/zulip_bots/bots/converter/doc.md",
-}
+markdown_docs_length_exclude = set()  # type: Set[str]
 
 markdown_rules = RuleList(
     langs=['md'],

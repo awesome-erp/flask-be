@@ -6,7 +6,6 @@ import sys
 import argparse
 import subprocess
 
-from collections import OrderedDict
 from pathlib import PurePath
 from zulint import lister
 from typing import cast, Dict, List
@@ -16,23 +15,7 @@ os.chdir(os.path.dirname(TOOLS_DIR))
 
 sys.path.append(os.path.dirname(TOOLS_DIR))
 
-exclude = [
-    # Excluded because it's third-party code.
-    "zulip/integrations/perforce/git_p4.py",
-    # Excluded because we don't want to require bot authors to
-    # fully annotate their bots.
-    "zulip_bots/zulip_bots/bots",
-    "zulip_bots/zulip_bots/bots_unmaintained",
-    # Excluded out of laziness:
-    "zulip_bots/zulip_bots/terminal.py",
-    "zulip_bots/zulip_bots/simple_lib.py",
-    "zulip_bots/zulip_bots/tests/test_lib.py",
-    # Excluded because this is a self-contained script
-    # we ask our users to download and run directly and
-    # py2 and py3 compatibility is required.
-    "zulip/integrations/trello/zulip_trello.py",
-    "tools",
-]
+exclude = []  # type: List[str]
 
 parser = argparse.ArgumentParser(description="Run mypy on files tracked by git.")
 parser.add_argument('targets', nargs='*', default=[],
@@ -57,8 +40,6 @@ parser.add_argument('--quick', action='store_true', default=False,
                     help="""Use the --quick flag with mypy""")
 args = parser.parse_args()
 
-if args.all:
-    exclude = []
 
 # find all non-excluded files in current directory
 files_dict = cast(Dict[str, List[str]],
@@ -72,10 +53,7 @@ pyi_files = set(files_dict['pyi'])
 python_files = [fpath for fpath in files_dict['py']
                 if not fpath.endswith('.py') or fpath + 'i' not in pyi_files]
 
-repo_python_files = {
-                        "aerp": [],
-                        "tools": []
-                    }
+repo_python_files = {"aerp": [], "tools": [], "setup": [], "config": []}  # type: Dict[str,List[str]]
 for file_path in python_files:
     repo = PurePath(file_path).parts[0]
     if repo in repo_python_files:

@@ -1,12 +1,10 @@
-#! /usr/bin/env python3
-
 import argparse
 
 from zulint.command import add_default_linter_arguments, LinterConfig
-
+from typing import List
 from custom_check import python_rules, non_py_rules
 
-EXCLUDED_FILES = []
+EXCLUDED_FILES = []  # type: List[str]
 
 def run() -> None:
     parser = argparse.ArgumentParser()
@@ -25,13 +23,16 @@ def run() -> None:
 
     @linter_config.lint
     def custom_py() -> int:
-        """Runs custom checks for python files (config: tools/linter_lib/custom_check.py)"""
+        """Runs custom checks for python files (config: tools/custom_check.py)"""
         failed = python_rules.check(by_lang, verbose=args.verbose)
+        print("-------------")
+        print(python_rules.check)
+        print("-------------")
         return 1 if failed else 0
 
     @linter_config.lint
     def custom_nonpy() -> int:
-        """Runs custom checks for non-python files (config: tools/linter_lib/custom_check.py)"""
+        """Runs custom checks for non-python files (config: tools/custom_check.py)"""
         failed = False
         for rule in non_py_rules:
             failed = failed or rule.check(by_lang, verbose=args.verbose)
