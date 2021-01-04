@@ -38,9 +38,9 @@ parser = argparse.ArgumentParser(description="Run mypy on files tracked by git."
 parser.add_argument('targets', nargs='*', default=[],
                     help="""files and directories to include in the result.
                     If this is not specified, the current directory is used""")
-parser.add_argument('-m', '--modified', action='store_true', default=False, 
+parser.add_argument('-m', '--modified', action='store_true', default=False,
                     help='list only modified files')
-parser.add_argument('-a', '--all', dest='all', action='store_true', 
+parser.add_argument('-a', '--all', dest='all', action='store_true',
                     default=False,
                     help="""run mypy on all python files, ignoring the exclude list.
                     This is useful if you have to find out which files fail

@@ -6,9 +6,7 @@ from zulint.command import add_default_linter_arguments, LinterConfig
 
 from custom_check import python_rules, non_py_rules
 
-EXCLUDED_FILES = [
-                    "aerp/database/dataValidity/Users.py"
-                 ]
+EXCLUDED_FILES = []
 
 def run() -> None:
     parser = argparse.ArgumentParser()
