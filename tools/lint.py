@@ -1,0 +1,46 @@
+#! /usr/bin/env python3
+
+import argparse
+
+from zulint.command import add_default_linter_arguments, LinterConfig
+
+from custom_check import python_rules, non_py_rules
+
+EXCLUDED_FILES = [
+                    "aerp/database/dataValidity/Users.py"
+                 ]
+
+def run() -> None:
+    parser = argparse.ArgumentParser()
+    add_default_linter_arguments(parser)
+    args = parser.parse_args()
+
+    linter_config = LinterConfig(args)
+
+    by_lang = linter_config.list_files(file_types=['py', 'sh', 'json', 'md', 'txt'],
+                                       exclude=EXCLUDED_FILES)
+
+    linter_config.external_linter('mypy', ['tools/run-mypy'], ['py'], pass_targets=False,
+                                  description="Static type checker for Python (config: mypy.ini)")
+    linter_config.external_linter('flake8', ['flake8'], ['py'],
+                                  description="Standard Python linter (config: .flake8)")
+
+    @linter_config.lint
+    def custom_py() -> int:
+        """Runs custom checks for python files (config: tools/linter_lib/custom_check.py)"""
+        failed = python_rules.check(by_lang, verbose=args.verbose)
+        return 1 if failed else 0
+
+    @linter_config.lint
+    def custom_nonpy() -> int:
+        """Runs custom checks for non-python files (config: tools/linter_lib/custom_check.py)"""
+        failed = False
+        for rule in non_py_rules:
+            failed = failed or rule.check(by_lang, verbose=args.verbose)
+        return 1 if failed else 0
+
+    linter_config.do_lint()
+
+
+if __name__ == '__main__':
+    run()
