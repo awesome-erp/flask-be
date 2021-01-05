@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Tuple
 from datetime import datetime
 
 
@@ -80,7 +80,7 @@ def checkPhone(phone: str) -> bool:
     return type(phone) == str
 
 
-def testAllInput(Inputs: Dict[str, Any]) -> (bool, str):
+def testAllInput(Inputs: Dict[str, Any]) -> Tuple[bool, str]:
     """
     Tests All Inputs for their validity
 

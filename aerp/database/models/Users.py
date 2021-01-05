@@ -1,34 +1,58 @@
 from aerp.database.models.BaseModel import Base
 from firebase_admin import auth
-from aerp.database.dataValidity.user_data_validity import testAllInput, checkName, \
-                                             checkDOB, checkEmail, checkPhone
+from aerp.database.dataValidity.user_data_validity import testAllInput, checkName, checkDOB, checkEmail, checkPhone
 from datetime import timedelta
-from typing import Optional
+from typing import Optional, Any, Dict
 
 
 class User(Base):
-
-    def __init__(self, authToken: str):
+    """
+    The User Model
+    """
+    def __init__(self, authToken: str) -> None:
+        """
+        User Model initalization
+        """
         self.database = self.init_database().collection("user_profiles")
         self.authToken = authToken
         self.userClaims = self.getUserClaims()
         self.uid = self.userClaims["uid"]
         self.userDocument = self.database.document(self.uid)
 
-    def getTimeLimitedToken(self, expiry: timedelta):
+    def getTimeLimitedToken(self, expiry: timedelta) -> str:
+        """
+        This returns a token with Limited validity
+
+        Parameters
+        ----------
+        expiry: datetime.timedelta
+            The datetime.timedelta object with the required validity
+
+        Returns
+        -------
+        str
+            The token with limited validity
+        """
         return auth.create_session_cookie(self.authToken, expires_in=expiry)
 
-    def getUserClaims(self):
+    def getUserClaims(self) -> Dict[str, Any]:
+        """
+        This function fetches the custom claims of the users
+
+        Returns
+        -------
+        dict
+            The details of users stored in the custom claims
+        """
         try:
-            userClaims = auth.verify_session_cookie(self.authToken,
-                                                    check_revoked=True)
+            userClaims = auth.verify_session_cookie(self.authToken, check_revoked=True)
             return userClaims
         except Exception:
             raise BaseException("Invalid access Token")
 
     def setData(self, dob: str, phone: str, personal_email: str,
                 role: str, team_id: str, organization: str,
-                name: Optional[str] = None):
+                name: Optional[str] = None) -> None:
         """
         Set User Data to the Data Base
 
@@ -51,8 +75,7 @@ class User(Base):
 
         Returns
         -------
-        bool
-            True/False according to the status: set or not
+        None
         """
         if not name:
             name = self.userClaims["name"]
@@ -67,10 +90,13 @@ class User(Base):
             "team_id": team_id,
             "salary": 0.0
         }
-        testAllInput(userData)
-        self.userDocument.set(userData)
+        inputTestResult, failure = testAllInput(userData)[0]
+        if inputTestResult is True:
+            self.userDocument.set(userData)
+        else:
+            raise Exception(f"Issues Detected in data: {failure}")
 
-    def getData(self):
+    def getData(self) -> Dict[str, Any]:
         """
         Get User data from database
 
@@ -116,9 +142,9 @@ class User(Base):
     def updateUserEditableData(self, name: Optional[str] = None,
                                dob: Optional[str] = None,
                                phone: Optional[str] = None,
-                               personal_email: Optional[str] = None):
+                               personal_email: Optional[str] = None) -> None:
         """
-        Update self editable fields
+        Update self editable fields for an user
 
         Prarameters
         -----------
@@ -133,8 +159,7 @@ class User(Base):
 
         Returns
         -------
-        bool:
-            True/False according to the status of the operation
+        None
         """
         userData = {}
         if name and checkName(name):

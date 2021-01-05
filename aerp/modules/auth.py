@@ -7,8 +7,8 @@ from aerp.modules.utils.auth_utils import clearDataForSet
 authorization = Blueprint("auth", __name__, static_folder='/static')
 
 
-@authorization.route("/sign-user", methods=['POST'])
-def sign_user():
+@authorization.route("/sign-user", methods=['POST'])  # type: ignore
+def sign_user() -> object:
     """
     Route for user SIGN in token verification
     """
@@ -17,11 +17,11 @@ def sign_user():
     try:
         user = User(accessToken)
     except Exception:
-        response = {
+        responseDict = {
             "status": "fail",
             "message": "ID token verification failed"
         }
-        return make_response(response, 401)
+        return make_response(responseDict, 401)
 
     expiry = timedelta(days=7)
     timeLimitedAuthToken = user.getTimeLimitedToken(expiry=expiry)
@@ -36,8 +36,8 @@ def sign_user():
     return response
 
 
-@authorization.route("/set-user-data", methods=['POST'])
-def set_user_data():
+@authorization.route("/set-user-data", methods=['POST'])  # type: ignore
+def set_user_data() -> object:
     """
     Route to set user data for 1st time
     """
@@ -61,8 +61,8 @@ def set_user_data():
     return make_response(responseDict, 200)
 
 
-@authorization.route("/userInfo", methods=['GET', 'POST'])
-def user_info():
+@authorization.route("/userInfo", methods=['GET', 'POST'])  # type: ignore
+def user_info() -> object:
     """
     The Route to fetch and update user data
 
@@ -115,11 +115,19 @@ def user_info():
                 "message": "error updating user profile"
             }
         return make_response(response, 200)
+    else:
+        response = {
+            "status": "fail",
+            "message": "Invalid request method"
+        }
+        return make_response(response, 404)
 
 
-@authorization.route("/sign-out", methods=['GET'])
-def remCookie():
-    resp = make_response({"status": "success"}, 200)
-    resp.set_cookie('accessToken', '', expires=0,
-                    secure=True, httponly=True, samesite="None")
-    return resp
+@authorization.route("/sign-out", methods=['GET'])  # type: ignore
+def remCookie() -> object:
+    """
+    Remove the HTTP only coocie for login
+    """
+    response = make_response({"status": "success"}, 200)
+    response.set_cookie('accessToken', '', expires=0, secure=True, httponly=True, samesite="None")
+    return response

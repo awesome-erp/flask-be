@@ -25,9 +25,6 @@ def run() -> None:
     def custom_py() -> int:
         """Runs custom checks for python files (config: tools/custom_check.py)"""
         failed = python_rules.check(by_lang, verbose=args.verbose)
-        print("-------------")
-        print(python_rules.check)
-        print("-------------")
         return 1 if failed else 0
 
     @linter_config.lint
