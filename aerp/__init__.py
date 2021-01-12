@@ -1,6 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 
+from aerp.modules.auth import authorization
+
 
 def create_app() -> object:
     """
@@ -23,9 +25,5 @@ def create_app() -> object:
                         "Content-Type"
                         ])
 
-    from aerp.modules.auth import authorization
-
-    # Register blueprints
     app.register_blueprint(authorization, url_prefix='/auth')
-
     return app

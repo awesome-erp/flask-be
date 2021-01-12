@@ -1,6 +1,6 @@
 venv-awesome-erp/
 **/*.pyc
-**/__pycache__/**
+**/__pycache__
 .vscode
 firebase_server.json
 zulint

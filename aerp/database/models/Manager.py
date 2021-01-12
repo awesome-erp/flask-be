@@ -3,7 +3,7 @@ from firebase_admin import auth, firestore
 from aerp.database.dataValidity.user_data_validity import testAllInput, checkName, checkDOB, checkEmail, checkPhone
 from aerp.database.extractData.leaveExtraction import getAllLeaves, getUserLeaves
 from aerp.database.extractData.userDataExtraction import extractFields, extractEmployeesFromUID, extractEmployeesFromStream
-from database import database
+from aerp.database import database
 from datetime import timedelta
 from typing import Optional, Any, Dict, List
 
