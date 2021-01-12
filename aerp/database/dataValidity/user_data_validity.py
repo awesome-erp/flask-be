@@ -17,7 +17,7 @@ def checkName(name: str) -> bool:
         True/False according to the validity of the name
     """
 
-    return type(name) == str and name.isalpha()
+    return type(name) == str
 
 
 def checkDOB(dob: str) -> bool:
@@ -37,7 +37,7 @@ def checkDOB(dob: str) -> bool:
     if not type(dob) == str:
         return False
     try:
-        datetime.strptime(dob, "%d-%m-%Y")
+        datetime.strptime(dob, "%Y-%m-%d")
     except Exception:
         return False
 

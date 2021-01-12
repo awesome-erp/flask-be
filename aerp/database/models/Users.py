@@ -1,22 +1,25 @@
 from aerp.database.models.BaseModel import Base
 from firebase_admin import auth
 from aerp.database.dataValidity.user_data_validity import testAllInput, checkName, checkDOB, checkEmail, checkPhone
+from database import database
 from datetime import timedelta
 from typing import Optional, Any, Dict
+import random
+import string
 
 
 class User(Base):
     """
     The User Model
     """
-    def __init__(self, authToken: str) -> None:
+    def __init__(self, uid: str) -> None:
         """
         User Model initalization
         """
-        self.database = self.init_database().collection("user_profiles")
-        self.authToken = authToken
-        self.userClaims = self.getUserClaims()
-        self.uid = self.userClaims["uid"]
+        self.database = database.collection("user_profiles")
+        #self.authToken = authToken
+        #self.userClaims = self.getUserClaims()
+        self.uid = uid #self.userClaims["uid"]
         self.userDocument = self.database.document(self.uid)
 
     def getTimeLimitedToken(self, expiry: timedelta) -> str:
@@ -51,8 +54,8 @@ class User(Base):
             raise BaseException("Invalid access Token")
 
     def setData(self, dob: str, phone: str, personal_email: str,
-                role: str, team_id: str, organization: str,
-                name: Optional[str] = None) -> None:
+                email: str, role: str, team_id: str, organization: str,
+                name: str) -> None:
         """
         Set User Data to the Data Base
 
@@ -68,6 +71,8 @@ class User(Base):
             Phone number of the User
         personal_email: str
             Personal Email of the User
+        email: str
+            Organization Email of the User
         role: str
             Role of User
         team_id: str
@@ -77,20 +82,26 @@ class User(Base):
         -------
         None
         """
-        if not name:
-            name = self.userClaims["name"]
         userData = {
+            "uid": self.uid,
             "name": name,
             "organization": organization,
             "dob": dob,
             "phone": phone,
-            "email": self.userClaims["email"],
+            "email": email,
             "personal_email": personal_email,
             "role": role,
             "team_id": team_id,
-            "salary": 0.0
+            "is_manager": False,
+            "employees": [],
+            "salary": 0.0,
+            "pending_leaves": {},
+            "approved_leaves": {},
+            "rejected_leaves": {},
+            "self_approved_leaves": {},
+            "self_rejected_leaves": {}
         }
-        inputTestResult, failure = testAllInput(userData)[0]
+        inputTestResult, failure = testAllInput(userData)
         if inputTestResult is True:
             self.userDocument.set(userData)
         else:
@@ -131,7 +142,7 @@ class User(Base):
             "organization": data["organization"],
             "dob": data["dob"],
             "phone": data["phone"],
-            "email": self.userClaims["email"],
+            "email": data["email"],
             "personal_email": data["personal_email"],
             "role": data["role"],
             "team_id": data["team_id"],
@@ -139,7 +150,7 @@ class User(Base):
         }
         return userData
 
-    def updateUserEditableData(self, name: Optional[str] = None,
+    def updateEditableData(self, name: Optional[str] = None,
                                dob: Optional[str] = None,
                                phone: Optional[str] = None,
                                personal_email: Optional[str] = None) -> None:
@@ -172,3 +183,21 @@ class User(Base):
             userData["personal_email"] = personal_email
 
         self.userDocument.update(userData)
+
+    def createLeave(self, leaveStart: str, leaveEnd: str, leaveCreated: str, description: str):
+        leaveID = self.uid + ''.join(random.choice(string.ascii_uppercase 
+                                                   + string.ascii_lowercase 
+                                                   + string.digits) for _ in range(10))
+        userName = self.userDocument.get().to_dict()["name"]
+        leave = {
+                "leave_start": leaveStart,
+                "leave_end": leaveEnd,
+                "leave_created": leaveCreated,
+                "marked_by_uid": "",
+                "marked_by_name": "",
+                "marked_by_email": "",
+                "description": description
+            }
+        self.userDocument.update({
+            f"pending_leaves.{leaveID}": leave
+        })
