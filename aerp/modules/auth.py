@@ -1,7 +1,8 @@
 from datetime import timedelta
+from firebase_admin import auth
 from flask import Blueprint, make_response, request
-from aerp.database.models.Users import User
-from aerp.modules.utils.auth_utils import clearDataForSet
+from aerp.database.models.Auth import Auth
+from aerp.modules.utils.auth_utils import dataSanitization, getTimeLimitedToken
 
 
 authorization = Blueprint("auth", __name__, static_folder='/static')
@@ -12,10 +13,10 @@ def sign_user() -> object:
     """
     Route for user SIGN in token verification
     """
-    postData = request.json
-    accessToken = postData["idToken"]
+    payload = request.json
+    idToken = payload["idToken"]
     try:
-        user = User(accessToken)
+        user = auth.verify_id_token(idToken)
     except Exception:
         responseDict = {
             "status": "fail",
@@ -24,7 +25,7 @@ def sign_user() -> object:
         return make_response(responseDict, 401)
 
     expiry = timedelta(days=7)
-    timeLimitedAuthToken = user.getTimeLimitedToken(expiry=expiry)
+    timeLimitedAuthToken = auth.create_session_cookie(self.authToken, expires_in=expiry)
     responseDict = {
         "status": "success",
         "accessToken": timeLimitedAuthToken
@@ -41,10 +42,10 @@ def set_user_data() -> object:
     """
     Route to set user data for 1st time
     """
-    postData = request.json
+    payload = request.json
     accessToken = request.cookies.get("accessToken")
     try:
-        user = User(accessToken)
+        user = auth.verify_session_cookie(accessToken, check_revoked=True)
     except Exception:
         response = {
             "status": "fail",
@@ -52,75 +53,13 @@ def set_user_data() -> object:
         }
         return make_response(response, 401)
 
-    userPersonalData = clearDataForSet(postData)
+    userPersonalData = dataSanitization(postData)
     user.setData(**userPersonalData)
     responseDict = {
         "status": "success",
         "user_id": user.uid
     }
     return make_response(responseDict, 200)
-
-
-@authorization.route("/userInfo", methods=['GET', 'POST'])  # type: ignore
-def user_info() -> object:
-    """
-    The Route to fetch and update user data
-
-    GET
-    ----
-        Route to get user details
-    POST
-    ----
-        Route to edit paricular user fields
-    """
-    accessToken = request.cookies.get("accessToken")
-    try:
-        user = User(accessToken)
-    except Exception:
-        response = {
-            "status": "fail",
-            "message": "ID token verification failed"
-        }
-        return make_response(response, 401)
-
-    if request.method == "GET":
-        user_profile = user.getData()
-        return make_response(user_profile, 200)
-
-    if request.method == "POST":
-        postData = request.json
-        name = None
-        personal_email = None
-        phone = None
-        dob = None
-        if "name" in postData:
-            name = postData["name"]
-        if "personal_email" in postData:
-            personal_email = postData["personal_email"]
-        if "phone" in postData:
-            phone = postData["phone"]
-        if "dob" in postData:
-            dob = postData["dob"]
-        try:
-            user.updateUserEditableData(name=name,
-                                        personal_email=personal_email,
-                                        dob=dob, phone=phone)
-            response = {
-                "status": "success",
-                "message": "user profile updated successfuly"
-            }
-        except Exception:
-            response = {
-                "status": "success",
-                "message": "error updating user profile"
-            }
-        return make_response(response, 200)
-    else:
-        response = {
-            "status": "fail",
-            "message": "Invalid request method"
-        }
-        return make_response(response, 404)
 
 
 @authorization.route("/sign-out", methods=['GET'])  # type: ignore

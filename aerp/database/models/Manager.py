@@ -16,7 +16,7 @@ class Manager(Base):
         """
         User Model initalization
         """
-        self.database = database.collection("user_profiles")
+        self.init_database()
         self.uid = uid
         self.document = self.database.document(self.uid)
         self.managerData = self.document.get().to_dict()

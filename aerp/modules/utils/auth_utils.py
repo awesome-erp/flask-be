@@ -1,7 +1,7 @@
 from typing import Dict, Any
 
 
-def clearDataForSet(dataInput: Dict[str, Any]) -> Dict[str, Any]:
+def dataSanitization(dataInput: Dict[str, Any]) -> Dict[str, Any]:
     """
     Sanitizes input data to output proper fields
 

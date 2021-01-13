@@ -1,7 +1,6 @@
 from aerp.database.models.BaseModel import Base
 from firebase_admin import auth
 from aerp.database.dataValidity.user_data_validity import testAllInput, checkName, checkDOB, checkEmail, checkPhone
-from aerp.database import database
 from datetime import timedelta
 from typing import Optional, Any, Dict
 import random
@@ -16,10 +15,8 @@ class User(Base):
         """
         User Model initalization
         """
-        self.database = database.collection("user_profiles")
-        #self.authToken = authToken
-        #self.userClaims = self.getUserClaims()
-        self.uid = uid #self.userClaims["uid"]
+        self.init_database()
+        self.uid = uid
         self.userDocument = self.database.document(self.uid)
 
     def getTimeLimitedToken(self, expiry: timedelta) -> str:

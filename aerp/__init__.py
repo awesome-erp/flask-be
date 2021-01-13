@@ -9,9 +9,7 @@ def create_app() -> object:
     Create Flask App
     """
     app = Flask(__name__)
-
     origins = "*"
-
     CORS(app,
          origins=origins,
          expose_headers='Authorization',
