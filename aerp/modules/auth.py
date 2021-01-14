@@ -1,8 +1,7 @@
 from datetime import timedelta
 from firebase_admin import auth
 from flask import Blueprint, make_response, request
-from aerp.database.models.Auth import Auth
-from aerp.modules.utils.auth_utils import dataSanitization, getTimeLimitedToken
+from aerp.database.models.Users import User
 
 
 authorization = Blueprint("auth", __name__, static_folder='/static')
@@ -16,7 +15,7 @@ def sign_user() -> object:
     payload = request.json
     idToken = payload["idToken"]
     try:
-        user = auth.verify_id_token(idToken)
+        authClaims = auth.verify_id_token(idToken)
     except Exception:
         responseDict = {
             "status": "fail",
@@ -28,7 +27,8 @@ def sign_user() -> object:
     timeLimitedAuthToken = auth.create_session_cookie(self.authToken, expires_in=expiry)
     responseDict = {
         "status": "success",
-        "accessToken": timeLimitedAuthToken
+        "accessToken": timeLimitedAuthToken,
+        "email": authClaims["email"]
     }
     response = make_response(responseDict, 200)
     response.set_cookie('accessToken', timeLimitedAuthToken, secure=True,
@@ -45,16 +45,17 @@ def set_user_data() -> object:
     payload = request.json
     accessToken = request.cookies.get("accessToken")
     try:
-        user = auth.verify_session_cookie(accessToken, check_revoked=True)
+        authClaims = auth.verify_session_cookie(accessToken, check_revoked=True)
     except Exception:
         response = {
             "status": "fail",
             "message": "ID token verification failed"
         }
         return make_response(response, 401)
-
-    userPersonalData = dataSanitization(postData)
-    user.setData(**userPersonalData)
+    
+    user = User(authClaims["uid"])
+    payload["email"] = authClaims["email"]
+    user.setData(payload)
     responseDict = {
         "status": "success",
         "user_id": user.uid

@@ -2,7 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from aerp.modules.auth import authorization
-
+from aerp.modules
 
 def create_app() -> object:
     """

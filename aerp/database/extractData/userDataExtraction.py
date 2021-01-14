@@ -56,3 +56,12 @@ def extractEmployeesFromStream(employees: Any, fields: List[str]) -> Dict[str, A
         employeesList.append(extractFields(employeeDict, fields=fields))
 
     return employeesList
+
+
+def filterFieldsForUpdate(fields: List[str], data: Dict[str, Any]) -> Dict[str, Any]:
+
+    fieldkeys = set(fields)
+    for field in data:
+        if field not in fieldkeys or data[field] in ["", None]:
+            data.pop(field)
+    return data
