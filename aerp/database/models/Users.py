@@ -1,10 +1,8 @@
 from aerp.database.models.BaseModel import Base
-from firebase_admin import auth
-from aerp.database.dataValidity.user_data_validity import testAllInput, checkName,
-                                                          checkDOB, checkEmail, checkPhone
-from datetime import timedelta
-from aerp.database.extractData.userDataExtraction import filterFieldsForUpdate
-from typing import Optional, Any, Dict
+from aerp.database.utils.write.user_data_validity import testAllInput
+from aerp.database.utils.read.userDataExtraction import extractFields
+
+from typing import Any, Dict
 import random
 import string
 
@@ -118,10 +116,10 @@ class User(Base):
         """
         Update self editable fields for an user
 
-        Prarameters 
+        Prarameters
         -----------
         Dict[str, Any]:
- 
+
         name: Optional[str]
             If user wants to change name
         dob: Optional[str]
@@ -136,28 +134,27 @@ class User(Base):
         None
         """
         updateAbles = ["name", "dob", "phone", "personal_email"]
-        data = filterFieldsForUpdate(fields=updateAbles, data=data)
+        data = extractFields(fields=updateAbles, data=data, returnEmpty=False)
         inputTestResult, failure = testAllInput(data)
 
         if inputTestResult is True:
-            self.userDocument.update(userData)
+            self.userDocument.update(data)
         else:
             raise Exception(f"Issues Detected in data: {failure}")
 
-    def createLeave(self, leaveStart: str, leaveEnd: str, leaveCreated: str, description: str):
-        leaveID = self.uid + ''.join(random.choice(string.ascii_uppercase 
-                                                   + string.ascii_lowercase 
+    def createLeave(self, leaveInput: Dict[str, str]) -> None:
+        leaveID = self.uid + ''.join(random.choice(string.ascii_uppercase
+                                                   + string.ascii_lowercase
                                                    + string.digits) for _ in range(10))
-        userName = self.userDocument.get().to_dict()["name"]
-        leave = {
-                "leave_start": leaveStart,
-                "leave_end": leaveEnd,
-                "leave_created": leaveCreated,
-                "marked_by_uid": "",
-                "marked_by_name": "",
-                "marked_by_email": "",
-                "description": description
-            }
-        self.userDocument.update({
-            f"pending_leaves.{leaveID}": leave
-        })
+        user = self.userDocument.get().to_dict()
+        leave = {"creator_name": user["name"],
+                 "creator_id": self.uid,
+                 "creator_email": user["email"],
+                 "leave_start": leaveInput["leaveStart"],
+                 "leave_end": leaveInput["leaveEnd"],
+                 "leave_created": leaveInput["leaveCreated"],
+                 "marked_by_uid": "",
+                 "marked_by_name": "",
+                 "marked_by_email": "",
+                 "description": leaveInput["description"]}
+        self.userDocument.update({f"pending_leaves.{leaveID}": leave})

@@ -1,6 +1,7 @@
-from typing import Optional, Any, Dict, List
+from firebase_admin import firestore
+from typing import Any, Dict, List
 
-def extractFields(data: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
+def extractFields(data: Dict[str, Any], fields: List[str], returnEmpty: bool = True) -> Dict[str, Any]:
     """
     Extracts the Listed Params from the dict
 
@@ -8,9 +9,9 @@ def extractFields(data: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
     ----------
     data: Dict[str, Any]
         The data to extract fields from
-    fields: List[str] 
+    fields: List[str]
         The list of fields whose data is to be extracted
-    
+
     Return
     ------
     Dict[str, Any]
@@ -19,18 +20,20 @@ def extractFields(data: Dict[str, Any], fields: List[str]) -> Dict[str, Any]:
     cleanedData = {}
     for field in fields:
         if field in data:
+            if returnEmpty is False and data[field] in ["", None, {}, []]:
+                continue
             cleanedData[field] = data[field]
-    
+
     return cleanedData
 
-def extractEmployeesFromUID(database, employees: List) -> Dict[str, Any]:
+def extractEmployeesFromUID(database: firestore.client, employees: List[str]) -> List[Dict[str, Any]]:
     """
     Extracts the Employees from the given list and a database
 
     Parameters
     ----------
-    employees: Dict[str, Any]
-    
+    employees: List[str]
+
     Return
     ------
     Dict[str, Any]
@@ -41,12 +44,12 @@ def extractEmployeesFromUID(database, employees: List) -> Dict[str, Any]:
                  "role", "team_id", "is_manager", "manager_id", "salary"]
     for employee in employees:
         employeeDict = database.document(employee).get().to_dict()
-        employeesList.append(extractFields( employeeDict, fields=fieldList))
+        employeesList.append(extractFields(employeeDict, fields=fieldList))
 
     return employeesList
 
 
-def extractEmployeesFromStream(employees: Any, fields: List[str]) -> Dict[str, Any]:
+def extractEmployeesFromStream(employees: Any, fields: List[str]) -> List[Dict[str, Any]]:
     """
     Extract employees from a Stream
     """
@@ -56,12 +59,3 @@ def extractEmployeesFromStream(employees: Any, fields: List[str]) -> Dict[str, A
         employeesList.append(extractFields(employeeDict, fields=fields))
 
     return employeesList
-
-
-def filterFieldsForUpdate(fields: List[str], data: Dict[str, Any]) -> Dict[str, Any]:
-
-    fieldkeys = set(fields)
-    for field in data:
-        if field not in fieldkeys or data[field] in ["", None]:
-            data.pop(field)
-    return data

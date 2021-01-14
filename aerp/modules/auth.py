@@ -1,6 +1,7 @@
 from datetime import timedelta
 from firebase_admin import auth
-from flask import Blueprint, make_response, request
+from flask import Blueprint, make_response, request, wrappers
+
 from aerp.database.models.Users import User
 
 
@@ -8,9 +9,9 @@ authorization = Blueprint("auth", __name__, static_folder='/static')
 
 
 @authorization.route("/sign-user", methods=['POST'])  # type: ignore
-def sign_user() -> object:
+def sign_user() -> wrappers.Response:
     """
-    Route for user SIGN in token verification
+    User SIGN in token verification and cookie creation
     """
     payload = request.json
     idToken = payload["idToken"]
@@ -21,10 +22,11 @@ def sign_user() -> object:
             "status": "fail",
             "message": "ID token verification failed"
         }
+        print(type(make_response(responseDict, 401)))
         return make_response(responseDict, 401)
 
     expiry = timedelta(days=7)
-    timeLimitedAuthToken = auth.create_session_cookie(self.authToken, expires_in=expiry)
+    timeLimitedAuthToken = auth.create_session_cookie(idToken, expires_in=expiry)
     responseDict = {
         "status": "success",
         "accessToken": timeLimitedAuthToken,
@@ -38,7 +40,7 @@ def sign_user() -> object:
 
 
 @authorization.route("/set-user-data", methods=['POST'])  # type: ignore
-def set_user_data() -> object:
+def set_user_data() -> wrappers.Response:
     """
     Route to set user data for 1st time
     """
@@ -52,7 +54,7 @@ def set_user_data() -> object:
             "message": "ID token verification failed"
         }
         return make_response(response, 401)
-    
+
     user = User(authClaims["uid"])
     payload["email"] = authClaims["email"]
     user.setData(payload)
@@ -64,7 +66,7 @@ def set_user_data() -> object:
 
 
 @authorization.route("/sign-out", methods=['GET'])  # type: ignore
-def remCookie() -> object:
+def remCookie() -> wrappers.Response:
     """
     Remove the HTTP only coocie for login
     """

@@ -1,12 +1,12 @@
 from firebase_admin import auth
-from flask import Blueprint, make_response, request
+from flask import Blueprint, make_response, request, wrappers
 from aerp.database.models.Users import User
 
 employee = Blueprint("auth", __name__, static_folder='/static')
 
 
 @employee.route("/info", methods=['POST'])  # type: ignore
-def info() -> object:
+def info() -> wrappers.Response:
     accessToken = request.cookies.get("accessToken")
     try:
         authClaims = auth.verify_session_cookie(accessToken, check_revoked=True)
@@ -19,11 +19,11 @@ def info() -> object:
 
     user = User(authClaims["uid"])
     userData = user.getData()
- 
+
     return make_response(userData, 401)
 
-@authorization.route("/update-data", methods=['POST'])  # type: ignore
-def set_user_data() -> object:
+@employee.route("/update-data", methods=['POST'])  # type: ignore
+def set_user_data() -> wrappers.Response:
     payload = request.json
     accessToken = request.cookies.get("accessToken")
     try:
@@ -41,8 +41,8 @@ def set_user_data() -> object:
     }
     return make_response(responseDict, 200)
 
-@authorization.route("/create-leave", methods=['GET'])  # type: ignore
-def create_leave() -> object:
+@employee.route("/create-leave", methods=['GET'])  # type: ignore
+def create_leave() -> wrappers.Response:
     payload = request.json
     accessToken = request.cookies.get("accessToken")
     try:
@@ -54,7 +54,7 @@ def create_leave() -> object:
         }
         return make_response(response, 401)
     user = User(authClaims["uid"])
-    user.createLeave (payload)
+    user.createLeave(payload)
     responseDict = {
         "status": "success",
     }

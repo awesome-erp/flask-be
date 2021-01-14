@@ -1,12 +1,10 @@
 from aerp.database.models.BaseModel import Base
-from firebase_admin import auth, firestore
-from aerp.database.dataValidity.user_data_validity import testAllInput, checkName, checkDOB, checkEmail, checkPhone
-from aerp.database.extractData.leaveExtraction import getAllLeaves, getUserLeaves
-from aerp.database.extractData.userDataExtraction import extractFields, extractEmployeesFromUID, extractEmployeesFromStream
-from aerp.database import database
-from datetime import timedelta
-from typing import Optional, Any, Dict, List
+from aerp.database.utils.write.user_data_validity import testAllInput
+from aerp.database.utils.read.leaveExtraction import getAllLeaves, getUserLeaves
+from aerp.database.utils.read.userDataExtraction import extractFields, extractEmployeesFromUID, extractEmployeesFromStream
 
+from firebase_admin import firestore
+from typing import Any, Dict, List
 
 class Manager(Base):
     """
@@ -45,7 +43,6 @@ class Manager(Base):
         else:
             return []
 
-
     def getAllApprovedLeaves(self) -> List[Dict[str, Any]]:
         """
         Get All Approved Leaves of the employees
@@ -63,7 +60,7 @@ class Manager(Base):
         """
         try:
             return getUserLeaves(self.uid, self.managerData, leaveType="self_approved_leaves")
-        except:
+        except Exception:
             return []
 
     def getAllRejectedLeaves(self) -> List[Dict[str, Any]]:
@@ -83,13 +80,13 @@ class Manager(Base):
         """
         try:
             return getUserLeaves(self.uid, self.managerData, leaveType="self_rejected_leaves")
-        except:
+        except Exception:
             return []
-    
-    def approveLeave(self, userID: str, leaveID: str):
+
+    def approveLeave(self, userID: str, leaveID: str) -> None:
         """
         This function deletes a pending leave and adds to the approved leaves
-        This updates the manager document as well and adds it 
+        This updates the manager document as well and adds it
         """
         userDetailsDoc = self.database.document(userID)
         userDetails = userDetailsDoc.get().to_dict()
@@ -97,18 +94,14 @@ class Manager(Base):
         leave["marked_by_uid"] = self.uid
         leave["marked_by_name"] = self.managerData["name"]
         leave["marked_by_email"] = self.managerData["email"]
-        userDetailsDoc.update({
-           f"pending_leaves.{leaveID}": firestore.DELETE_FIELD,
-           f"approved_leaves.{leaveID}": leave
-        })
-        self.document.update({
-           f"self_approved_leaves.{leaveID}": leave
-        })
-    
-    def rejectLeave(self, userID: str, leaveID: str):
+        userDetailsDoc.update({f"pending_leaves.{leaveID}": firestore.DELETE_FIELD,
+                               f"approved_leaves.{leaveID}": leave})
+        self.document.update({f"self_approved_leaves.{leaveID}": leave})
+
+    def rejectLeave(self, userID: str, leaveID: str) -> None:
         """
         This function deletes a pending leave and adds to the approved leaves
-        This updates the manager document as well and adds it 
+        This updates the manager document as well and adds it
         """
         userDetailsDoc = self.database.document(userID)
         userDetails = userDetailsDoc.get().to_dict()
@@ -116,15 +109,11 @@ class Manager(Base):
         leave["marked_by_uid"] = self.uid
         leave["marked_by_name"] = self.managerData["name"]
         leave["marked_by_email"] = self.managerData["email"]
-        userDetailsDoc.update({
-           f"pending_leaves.{leaveID}": firestore.DELETE_FIELD,
-           f"rejected_leaves.{leaveID}": leave
-        })
-        self.document.update({
-           f"self_rejected_leaves.{leaveID}": leave
-        })
-    
-    def updateEmployeeData(self, userID: str, data: Dict[str, Any]):
+        userDetailsDoc.update({f"pending_leaves.{leaveID}": firestore.DELETE_FIELD,
+                               f"rejected_leaves.{leaveID}": leave})
+        self.document.update({f"self_rejected_leaves.{leaveID}": leave})
+
+    def updateEmployeeData(self, userID: str, data: Dict[str, Any]) -> None:
         """
         Update Managerial data for user
         """
@@ -132,16 +121,20 @@ class Manager(Base):
             userDetailsDoc = self.database.document(userID)
             fieldsToExtract = ["salary", "is_manager", "team_id", "role"]
             updateValue = extractFields(data=data, fields=fieldsToExtract)
-            userDetailsDoc.update(updateValue)
+            inputTestResult, failure = testAllInput(updateValue)
+            if inputTestResult is True:
+                userDetailsDoc.update(updateValue)
+            else:
+                raise Exception(f"Issues Detected in data: {failure}")
 
-    def getAllJrEmployees(self):
+    def getAllJrEmployees(self) -> List[Dict[str, Any]]:
         """
         Get all employees under a particular manager
         """
         employees = self.managerData["employees"]
         return extractEmployeesFromUID(self.database, employees=employees)
 
-    def getAllJrManagers(self):
+    def getAllJrManagers(self) -> List[Dict[str, Any]]:
         """
         Get all managers under a particular manager
         """
@@ -153,18 +146,18 @@ class Manager(Base):
                      "role", "team_id", "is_manager", "manager_id", "salary"]
         return extractEmployeesFromStream(employees=employeeData, fields=fieldList)
 
-    def getAllManagersOfEmployee(self, userID: str):
+    def getAllManagersOfEmployee(self, userID: str) -> List[Dict[str, Any]]:
         """
         Get all managers of a particular employee
         """
         employees = self.managerData["employees"]
-        employeeData = self.database.where("employees", "array_contains", userID)\
+        employeeData = self.database.where("employees", "array_contains", employees)\
                                     .stream()
         fieldList = ["name", "dob", "phone", "email", "personal_email", "uid",
                      "role", "team_id", "is_manager", "manager_id", "salary"]
         return extractEmployeesFromStream(employees=employeeData, fields=fieldList)
 
-    def getUnassignedEmployees(self):
+    def getUnassignedEmployees(self) -> List[Dict[str, Any]]:
         """
         Get Employees that are not assigned to teams
         """
@@ -173,26 +166,20 @@ class Manager(Base):
                      "role", "team_id", "is_manager", "manager_id", "salary"]
         return extractEmployeesFromStream(employees=employeeData, fields=fieldList)
 
-    def removeSelfAsManager(self, employee_uid: str):
-        self.document.update({
-            "employees": firestore.ArrayRemove([employee_uid])
-        })
-    
-    def assignOtherManager(self, manager_uid: str, employee_uid: str):
-        employees = set(self.managerData["employees"])
-        if manager_uid in employees and employee_uid in employees:
-            self.database.document(manager_uid).update({
-                "employees": firestore.ArrayUnion([employee_uid])
-            })
-    
-    def removeManagerForEmployee(self, manager_uid: str, employee_uid: str):
-        employees = set(self.managerData["employees"])
-        if manager_uid in employees and employee_uid in employees:
-            self.database.document(manager_uid).update({
-                "employees": firestore.ArrayRemove([employee_uid])
-            })
+    def removeSelfAsManager(self, employee_uid: str) -> None:
+        self.document.update({"employees": firestore.ArrayRemove([employee_uid])})
 
-    def removeEmployee(self, userID: str):
+    def assignOtherManager(self, manager_uid: str, employee_uid: str) -> None:
+        employees = set(self.managerData["employees"])
+        if manager_uid in employees and employee_uid in employees:
+            self.database.document(manager_uid).update({"employees": firestore.ArrayUnion([employee_uid])})
+
+    def removeManagerForEmployee(self, manager_uid: str, employee_uid: str) -> None:
+        employees = set(self.managerData["employees"])
+        if manager_uid in employees and employee_uid in employees:
+            self.database.document(manager_uid).update({"employees": firestore.ArrayRemove([employee_uid])})
+
+    def removeEmployee(self, userID: str) -> None:
         """
         Remove an employee and assign manager to all employees under the person
         to as self
@@ -207,8 +194,5 @@ class Manager(Base):
                             "approved_leaves": {},
                             "rejected_leaves": {},
                             "self_rejected_leaves": {},
-                            "self_approved_leaves": {}
-                            })
-        self.document.update({
-            "employees": firestore.ArrayUnion(employeeDict["employees"])
-        })
+                            "self_approved_leaves": {}})
+        self.document.update({"employees": firestore.ArrayUnion(employeeDict["employees"])})

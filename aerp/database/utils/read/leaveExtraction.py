@@ -1,7 +1,7 @@
-from typing import Optional, Any, Dict, List
+from typing import Any, Dict, List
 
 
-def getUserLeaves(userID: str, user: Dict[str, Any], leaveType: str) -> List[Dict[str, Any]]:
+def getUserLeaves(user: Dict[str, Any], leaveType: str) -> List[Dict[str, Any]]:
     """
     Returns leaves of a particular type for all users
 
@@ -21,7 +21,7 @@ def getUserLeaves(userID: str, user: Dict[str, Any], leaveType: str) -> List[Dic
     Returns
     -------
     List[Dict[str, Any]]
-        List with 
+        List with
             uid: User id
             leave_id: str
             user_name: Name of employee
@@ -35,19 +35,7 @@ def getUserLeaves(userID: str, user: Dict[str, Any], leaveType: str) -> List[Dic
     leaveList = []
     for leaveID in user[leaveType]:
         leaveDict = user[leaveType][leaveID]
-        modifiedLeaveDict = {
-            "uid": userID,
-            "leave_id": leaveID,
-            "user_name": user["name"],
-            "leave_start": leaveDict["leave_start"],
-            "leave_end": leaveDict["leave_end"],
-            "leave_created": leaveDict["leave_created"],
-            "description": leaveDict["description"],
-            "marked_by_uid": leaveDict["marked_by_uid"],
-            "marked_by_name": leaveDict["marked_by_name"],
-            "marked_by_email": leaveDict["marked_by_email"]
-        }
-        leaveList.append(modifiedLeaveDict)
+        leaveList.append(leaveDict)
 
     return leaveList
 
@@ -60,7 +48,7 @@ def getAllLeaves(database: Any, employees: List[str], leaveType: str) -> List[Di
     ----------
     database: Any
         user database
-    employees: List[str] 
+    employees: List[str]
         It consists of all employee uids
     leaveType: str
         Can be "pending_leaves"||"approved_leaves"||"cancelled_leaves"
@@ -68,7 +56,7 @@ def getAllLeaves(database: Any, employees: List[str], leaveType: str) -> List[Di
     Returns
     -------
     List[Dict[str, Any]]
-        List of 
+        List of
             uid: User id
             user_name: Name of employee
             leave_id: str
@@ -80,7 +68,7 @@ def getAllLeaves(database: Any, employees: List[str], leaveType: str) -> List[Di
     leaves = []
     for employee in employees:
         employeeDict = database.document(employee).get().to_dict()
-        userLeaveList = getUserLeaves(employee, employeeDict, leaveType)
+        userLeaveList = getUserLeaves(employeeDict, leaveType)
         leaves.extend(userLeaveList)
-    
+
     return leaves
