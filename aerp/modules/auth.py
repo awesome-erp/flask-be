@@ -2,7 +2,7 @@ from datetime import timedelta
 from firebase_admin import auth
 from flask import Blueprint, make_response, request, wrappers
 
-from aerp.database.models.Users import User
+from aerp.database.models.User import User
 
 
 authorization = Blueprint("auth", __name__, static_folder='/static')
@@ -34,7 +34,7 @@ def sign_user() -> wrappers.Response:
     }
     response = make_response(responseDict, 200)
     response.set_cookie('accessToken', timeLimitedAuthToken, secure=True,
-                        httponly=True, samesite="Strict")
+                        domain="awesome-erp.github.io", httponly=True, samesite="Strict")
 
     return response
 
@@ -71,5 +71,6 @@ def remCookie() -> wrappers.Response:
     Remove the HTTP only coocie for login
     """
     response = make_response({"status": "success"}, 200)
-    response.set_cookie('accessToken', '', expires=0, secure=True, httponly=True, samesite="None")
+    response.set_cookie('accessToken', '', expires=0, secure=True,
+                        domain="awesome-erp.github.io", httponly=True, samesite="None")
     return response

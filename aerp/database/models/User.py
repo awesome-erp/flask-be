@@ -1,7 +1,9 @@
 from aerp.database.models.BaseModel import Base
 from aerp.database.utils.write.user_data_validity import testAllInput
 from aerp.database.utils.read.userDataExtraction import extractFields
+from aerp.database.utils.read.leaveExtraction import getAllLeaves
 
+from firebase_admin import firestore
 from typing import Any, Dict
 import random
 import string
@@ -45,7 +47,7 @@ class User(Base):
         None
         """
         userData = {
-            "uid": self.uid,
+            "user_id": self.uid,
             "name": data["name"],
             "organization": data["organization"],
             "dob": data["dob"],
@@ -99,7 +101,7 @@ class User(Base):
         """
         data = self.userDocument.get().to_dict()
         userData = {
-            "user_id": self.uid,
+            "user_id": data["user_id"],
             "name": data["name"],
             "organization": data["organization"],
             "dob": data["dob"],
@@ -143,18 +145,29 @@ class User(Base):
             raise Exception(f"Issues Detected in data: {failure}")
 
     def createLeave(self, leaveInput: Dict[str, str]) -> None:
-        leaveID = self.uid + ''.join(random.choice(string.ascii_uppercase
-                                                   + string.ascii_lowercase
-                                                   + string.digits) for _ in range(10))
+        leaveID = self.uid + "-" + ''.join(random.choice(string.ascii_uppercase
+                                                         + string.ascii_lowercase
+                                                         + string.digits) for _ in range(10))
         user = self.userDocument.get().to_dict()
-        leave = {"creator_name": user["name"],
+        leaveDoc = self.leaves_database.document(leaveID)
+        leave = {"leave_id": leaveID,
+                 "creator_name": user["name"],
                  "creator_id": self.uid,
                  "creator_email": user["email"],
                  "leave_start": leaveInput["leaveStart"],
                  "leave_end": leaveInput["leaveEnd"],
                  "leave_created": leaveInput["leaveCreated"],
+                 "marked_as": "pending",
                  "marked_by_uid": "",
                  "marked_by_name": "",
                  "marked_by_email": "",
                  "description": leaveInput["description"]}
-        self.userDocument.update({f"pending_leaves.{leaveID}": leave})
+        leaveDoc.set(leave)
+
+    def getLeaves(self, leaveType: str):
+        leaves = self.leaves_database.where("creator_id", "==", self.uid)\
+                                     .where("marked_as", "==", leaveType)\
+                                     .order_by("leave_created", direction = firestore.Query.DESCENDING)\
+                                     .stream()
+
+        return getAllLeaves(leaves=leaves)

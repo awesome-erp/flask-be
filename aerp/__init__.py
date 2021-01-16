@@ -2,6 +2,7 @@ from flask import Flask
 from flask_cors import CORS
 
 from aerp.modules.auth import authorization
+from aerp.modules.employee import employee
 
 def create_app() -> object:
     """
@@ -23,4 +24,5 @@ def create_app() -> object:
                         ])
 
     app.register_blueprint(authorization, url_prefix='/auth')
+    app.register_blueprint(employee, url_prefix='/employee')
     return app

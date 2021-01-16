@@ -40,7 +40,7 @@ def extractEmployeesFromUID(database: firestore.client, employees: List[str]) ->
         List of employees
     """
     employeesList = []
-    fieldList = ["name", "dob", "phone", "email", "personal_email", "uid",
+    fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id",
                  "role", "team_id", "is_manager", "manager_id", "salary"]
     for employee in employees:
         employeeDict = database.document(employee).get().to_dict()
