@@ -63,7 +63,7 @@ def get_jr_managers() -> wrappers.Response:
     }
     return make_response(responseDict, 200)
 
-@manager.route("/<str:user_id>/get-managers", methods=['GET'])  # type: ignore
+@manager.route("/<string:user_id>/get-managers", methods=['GET'])  # type: ignore
 def get_managers_of_employee(user_id: str) -> wrappers.Response:
     accessToken = request.cookies.get("accessToken")
     try:
@@ -103,7 +103,7 @@ def get_unassigned_employees() -> wrappers.Response:
     }
     return make_response(responseDict, 200)
 
-@manager.route("/<str:user_id>/self-remove-manager", methods=['GET'])  # type: ignore
+@manager.route("/<string:user_id>/self-remove-manager", methods=['GET'])  # type: ignore
 def self_remove_manager(user_id: str) -> wrappers.Response:
     accessToken = request.cookies.get("accessToken")
     try:
@@ -122,7 +122,7 @@ def self_remove_manager(user_id: str) -> wrappers.Response:
     }
     return make_response(responseDict, 200)
 
-@manager.route("/<str:employee_id>/remove-manager/<str:manager_id>", methods=['GET'])  # type: ignore
+@manager.route("/<string:employee_id>/remove-manager/<string:manager_id>", methods=['GET'])  # type: ignore
 def remove_manager(employee_id: str, manager_id: str) -> wrappers.Response:
     accessToken = request.cookies.get("accessToken")
     try:
@@ -142,7 +142,7 @@ def remove_manager(employee_id: str, manager_id: str) -> wrappers.Response:
     }
     return make_response(responseDict, 200)
 
-@manager.route("/<str:employee_id>/add-manager/<str:manager_id>", methods=['GET'])  # type: ignore
+@manager.route("/<string:employee_id>/add-manager/<string:manager_id>", methods=['GET'])  # type: ignore
 def add_manager(employee_id: str, manager_id: str) -> wrappers.Response:
     accessToken = request.cookies.get("accessToken")
     try:
@@ -182,7 +182,7 @@ def mark_leave() -> wrappers.Response:
     }
     return make_response(responseDict, 200)
 
-@manager.route("/get-leave/<str:leaveType>", methods=['POST'])  # type: ignore
+@manager.route("/get-leave/<string:leaveType>", methods=['POST'])  # type: ignore
 def get_leave(leaveType: str) -> wrappers.Response:
     accessToken = request.cookies.get("accessToken")
     try:

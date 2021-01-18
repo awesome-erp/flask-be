@@ -3,6 +3,7 @@ from firebase_admin import auth
 from flask import Blueprint, make_response, request, wrappers
 
 from aerp.database.models.User import User
+from .utils import checkPermission
 
 
 authorization = Blueprint("auth", __name__, static_folder='/static')
@@ -47,7 +48,7 @@ def set_user_data() -> wrappers.Response:
     payload = request.json
     accessToken = request.cookies.get("accessToken")
     try:
-        authClaims = auth.verify_session_cookie(accessToken, check_revoked=True)
+        authClaims = checkPermission(request)
     except Exception:
         response = {
             "status": "fail",

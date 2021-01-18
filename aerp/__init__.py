@@ -3,15 +3,16 @@ from flask_cors import CORS
 
 from aerp.modules.auth import authorization
 from aerp.modules.employee import employee
+from aerp.modules.manager import manager
 
 def create_app() -> object:
     """
     Create Flask App
     """
     app = Flask(__name__)
-    origins = "*"
+    origins = "http://localhost:4200"
     CORS(app,
-         origins=origins,
+         origins = origins,
          expose_headers='Authorization',
          supports_credentials=True,
          allow_headers=['Access-Control-Allow-Origin',
@@ -25,4 +26,5 @@ def create_app() -> object:
 
     app.register_blueprint(authorization, url_prefix='/auth')
     app.register_blueprint(employee, url_prefix='/employee')
+    app.register_blueprint(manager,url_prefix='/manager')
     return app

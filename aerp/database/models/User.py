@@ -49,11 +49,11 @@ class User(Base):
         userData = {
             "user_id": self.uid,
             "name": data["name"],
-            "organization": data["organization"],
+            # "organization": data["organization"],
             "dob": data["dob"],
             "phone": data["phone"],
             "email": data["email"],
-            "personal_email": data["personal_email"],
+            "personal_email": data["personalEmail"],
             "role": "",
             "team_id": "",
             "is_manager": False,
@@ -103,7 +103,7 @@ class User(Base):
         userData = {
             "user_id": data["user_id"],
             "name": data["name"],
-            "organization": data["organization"],
+            # "organization": data["organization"], why is this here???
             "dob": data["dob"],
             "phone": data["phone"],
             "email": data["email"],
