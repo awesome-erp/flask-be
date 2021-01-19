@@ -10,4 +10,5 @@ class Base:
         Function for initialization of the databases
         """
         self.database = database.collection("user_profiles")
-        self.leaves_database = database.collection("leaves")
+        self.requests_database = database.collection("requests")
+

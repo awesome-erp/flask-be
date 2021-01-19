@@ -3,7 +3,8 @@ from firebase_admin import auth
 from flask import Blueprint, make_response, request, wrappers
 
 from aerp.database.models.User import User
-
+from aerp.utils.auth import checkPermission
+from aerp.utils.responses import success, failure
 
 authorization = Blueprint("auth", __name__, static_folder='/static')
 
@@ -18,21 +19,15 @@ def sign_user() -> wrappers.Response:
     try:
         authClaims = auth.verify_id_token(idToken)
     except Exception:
-        responseDict = {
-            "status": "fail",
-            "message": "ID token verification failed"
-        }
-        print(type(make_response(responseDict, 401)))
-        return make_response(responseDict, 401)
+        return failure(code=401)
 
     expiry = timedelta(days=7)
     timeLimitedAuthToken = auth.create_session_cookie(idToken, expires_in=expiry)
-    responseDict = {
-        "status": "success",
-        "accessToken": timeLimitedAuthToken,
+    userDetails = {
+        "access_token": timeLimitedAuthToken,
         "email": authClaims["email"]
     }
-    response = make_response(responseDict, 200)
+    response = success("user_details", userDetails, 200)
     response.set_cookie('accessToken', timeLimitedAuthToken, secure=True,
                         domain="awesome-erp.github.io", httponly=True, samesite="Strict")
 
@@ -47,22 +42,14 @@ def set_user_data() -> wrappers.Response:
     payload = request.json
     accessToken = request.cookies.get("accessToken")
     try:
-        authClaims = auth.verify_session_cookie(accessToken, check_revoked=True)
+        authClaims = checkPermission(request)
     except Exception:
-        response = {
-            "status": "fail",
-            "message": "ID token verification failed"
-        }
-        return make_response(response, 401)
+        return failure(code=401)
 
     user = User(authClaims["uid"])
     payload["email"] = authClaims["email"]
     user.setData(payload)
-    responseDict = {
-        "status": "success",
-        "user_id": user.uid
-    }
-    return make_response(responseDict, 200)
+    return success("user_id", user.uid, 200)
 
 
 @authorization.route("/sign-out", methods=['GET'])  # type: ignore
@@ -70,7 +57,7 @@ def remCookie() -> wrappers.Response:
     """
     Remove the HTTP only coocie for login
     """
-    response = make_response({"status": "success"}, 200)
+    response = success(code=200)
     response.set_cookie('accessToken', '', expires=0, secure=True,
                         domain="awesome-erp.github.io", httponly=True, samesite="None")
     return response

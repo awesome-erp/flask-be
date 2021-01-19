@@ -2,4 +2,4 @@ import aerp
 app = aerp.create_app()
 
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=8888, debug=True)
+    app.run(host='127.0.0.1', port=8888, debug=True,ssl_context="adhoc")
