@@ -11,4 +11,3 @@ class Base:
         """
         self.database = database.collection("user_profiles")
         self.requests_database = database.collection("requests")
-

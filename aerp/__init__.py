@@ -26,5 +26,5 @@ def create_app() -> object:
 
     app.register_blueprint(authorization, url_prefix='/auth')
     app.register_blueprint(employee, url_prefix='/employee')
-    app.register_blueprint(manager,url_prefix='/manager')
+    app.register_blueprint(manager, url_prefix='/manager')
     return app

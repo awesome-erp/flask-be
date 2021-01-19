@@ -62,7 +62,7 @@ class User(Base):
             "salary": data["salary"],
             "manager_id": data["salary"],
             "manager_name": data["manager_name"],
-            "manager_email": data["manager_email"] 
+            "manager_email": data["manager_email"]
         }
         return userData
 
