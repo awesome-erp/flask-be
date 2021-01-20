@@ -1,0 +1,96 @@
+#!/usr/bin/env python3
+"""
+This is expected be run on a bash shell
+"""
+import os
+import sys
+import argparse
+import subprocess
+
+from importlib import import_module
+
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+
+red = "\033[91m"
+green = "\033[92m"
+end_format = "\033[0m"
+bold = "\033[1m"
+
+def main() -> None:
+    usage = """./tools/set-env
+    Creates a Python virtualenv. Its Python version is equal to
+    the Python version this command is executed with."""
+    parser = argparse.ArgumentParser(usage=usage)
+    parser.add_argument("--python-interpreter", "-p",
+                        metavar="PATH_TO_PYTHON_INTERPRETER",
+                        default=os.path.abspath(sys.executable),
+                        help="Path to the Python interpreter to use when provisioning.")
+    options = parser.parse_args()
+
+    base_dir = os.path.abspath(os.path.join(__file__, "..", ".."))
+    py_version_output = subprocess.check_output([options.python_interpreter, "--version"],
+                                                stderr=subprocess.STDOUT, universal_newlines=True)
+    # The output has the format "Python 1.2.3"
+    py_version_list = py_version_output.split()[1].split(".")
+    py_version = tuple(int(num) for num in py_version_list[0:2])
+    venv_name = "venv-awesome-erp"
+
+    if py_version <= (3, 7):
+        print(f"{red}Setup failed: Cannot create venv with outdated Python version ({py_version_output.strip()}).{end_format}\n")
+        sys.exit(1)
+
+    venv_dir = os.path.join(base_dir, venv_name)
+    if not os.path.isdir(venv_dir):
+        try:
+            return_code = subprocess.call(["virtualenv", "-p", options.python_interpreter, venv_dir])
+        except OSError:
+            if subprocess.call(["which", "virtualenv"]):
+                print(f"{red}Please install the virtualenv package and try again.{end_format}")
+                sys.exit(1)
+        else:
+            if return_code:
+                raise OSError(f"The command `virtualenv -p {options.python_interpreter} {venv_dir}` failed. Virtualenv not created!")
+            print("New virtualenv created.")
+    else:
+        print("Virtualenv already exists.")
+
+    if os.path.isdir(os.path.join(venv_dir, "Scripts")):
+        # Virtual uses /Scripts instead of /bin on Windows.
+        # Read https://virtualenv.pypa.io/en/stable/userguide/
+        venv_exec_dir = "Scripts"
+    else:
+        venv_exec_dir = "bin"
+
+    activate_module_dir = os.path.abspath(os.path.join(venv_dir, venv_exec_dir))
+    sys.path.append(activate_module_dir)
+
+    import_module("activate_this")
+
+    # On OS X, ensure we use the virtualenv version of the python binary for
+    # future subprocesses instead of the version that this script was launched with. See
+    # https://stackoverflow.com/questions/26323852/whats-the-meaning-of-pyvenv-launcher-environment-variable
+    if "__PYVENV_LAUNCHER__" in os.environ:
+        del os.environ["__PYVENV_LAUNCHER__"]
+
+    def install_dependencies(requirements_filename: str) -> None:
+        pip_path = os.path.join(venv_dir, venv_exec_dir, "pip")
+        # We first install a modern version of pip that supports --prefix
+        subprocess.call([pip_path, "install", "pip>=9.0"])
+        if subprocess.call([pip_path, "install", "--prefix", venv_dir, "-r",
+                            os.path.join(base_dir, requirements_filename)]):
+            print(f"{red}The command `pip install -r {os.path.join(base_dir, requirements_filename)}` failed.{end_format}\n\n")
+        else:
+            print("\n\n")
+
+    install_dependencies("requirements.txt")
+
+    print(f"{green}Success!!{end_format}")
+
+    activate_command = os.path.join(base_dir, venv_dir, venv_exec_dir, "activate")
+    activate_command = activate_command.replace(os.sep, "/")
+    print("\nRun the following to enter into the virtualenv:\n")
+    print(f"{bold}source", activate_command, end_format, "\n")
+
+
+if __name__ == "__main__":
+    main()
