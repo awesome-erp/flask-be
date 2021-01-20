@@ -102,3 +102,25 @@ def get_leave(requestType: str, markedAs: str) -> wrappers.Response:
     else:
         reqs = manager.getMarkedRequests(reqType=requestType, markedAs=markedAs)
     return success(requestType, reqs, 200)
+
+@manager.route("/transaction/<string:userId>", methods=['POST'])  # type: ignore
+def get_leave(userID: str) -> wrappers.Response:
+    payload = request.json
+    try:
+        authClaims = checkPermission(request)
+        manager = Manager(authClaims["uid"])
+    except Exception:
+        return failure(code=401)
+    manager.markTransaction(userID=userID, transaction=payload)
+    return success(code=200)
+
+@manager.route("/filter", methods=['POST'])  # type: ignore
+def get_leave(userID: str) -> wrappers.Response:
+    payload = request.json
+    try:
+        authClaims = checkPermission(request)
+        manager = Manager(authClaims["uid"])
+    except Exception:
+        return failure(code=401)
+    employees = manager.filters(**payload)
+    return success("employees", employees, code=200)

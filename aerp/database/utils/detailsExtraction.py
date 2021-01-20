@@ -1,5 +1,5 @@
 from firebase_admin import firestore
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Generator
 
 def extractFields(data: Dict[str, Any], fields: List[str], returnEmpty: bool = True) -> Dict[str, Any]:
     """
@@ -26,30 +26,7 @@ def extractFields(data: Dict[str, Any], fields: List[str], returnEmpty: bool = T
 
     return cleanedData
 
-def extractEmployeesFromUID(database: firestore.client, employees: List[str]) -> List[Dict[str, Any]]:
-    """
-    Extracts the Employees from the given list and a database
-
-    Parameters
-    ----------
-    employees: List[str]
-
-    Return
-    ------
-    Dict[str, Any]
-        List of employees
-    """
-    employeesList = []
-    fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id",
-                 "role", "team_id", "is_manager", "manager_id", "salary"]
-    for employee in employees:
-        employeeDict = database.document(employee).get().to_dict()
-        employeesList.append(extractFields(employeeDict, fields=fieldList))
-
-    return employeesList
-
-
-def extractEmployeesFromStream(employees: Any, fields: List[str]) -> List[Dict[str, Any]]:
+def extractEmployeesFromStream(employees: Generator, fields: List[str]) -> List[Dict[str, Any]]:
     """
     Extract employees from a Stream
     """
@@ -59,3 +36,11 @@ def extractEmployeesFromStream(employees: Any, fields: List[str]) -> List[Dict[s
         employeesList.append(extractFields(employeeDict, fields=fields))
 
     return employeesList
+
+def getAllDocs(docs: Generator) -> List[Dict[str, Any]]:
+    docsList = []
+    for doc in docs:
+        docDict = doc.to_dict()
+        docsList.append(docDict)
+
+    return docsList

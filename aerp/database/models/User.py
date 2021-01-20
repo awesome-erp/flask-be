@@ -1,7 +1,6 @@
 from aerp.database.models.BaseModel import Base
-from aerp.database.utils.write.user_data_validity import testAllInput
-from aerp.database.utils.read.userDataExtraction import extractFields
-from aerp.database.utils.read.detailsExtraction import getAllDocs
+from aerp.database.utils.userDataValidity import testAllInput
+from aerp.database.utils.detailsExtraction import getAllDocs, extractFields
 
 from firebase_admin import firestore
 from typing import Any, Dict
@@ -40,6 +39,7 @@ class User(Base):
             "is_admin": False,
             "employees": [],
             "salary": 0.0,
+            "payments": []
         }
         inputTestResult, failure = testAllInput(userData)
         if inputTestResult is True:
@@ -60,9 +60,11 @@ class User(Base):
             "team_id": data["team_id"],
             "team_name": data["team_name"],
             "salary": data["salary"],
+            "is_manager": data["is_manager"],
             "manager_id": data["salary"],
             "manager_name": data["manager_name"],
-            "manager_email": data["manager_email"]
+            "manager_email": data["manager_email"],
+            "payments": data["payments"]
         }
         return userData
 

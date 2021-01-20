@@ -1,4 +1,5 @@
 venv-awesome-erp/
+.mypy_cache/
 **/*.pyc
 **/__pycache__
 .vscode

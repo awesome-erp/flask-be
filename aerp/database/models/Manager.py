@@ -1,7 +1,6 @@
 from aerp.database.models.BaseModel import Base
-from aerp.database.utils.write.user_data_validity import testAllInput
-from aerp.database.utils.read.detailsExtraction import getAllDocs
-from aerp.database.utils.read.userDataExtraction import extractFields, extractEmployeesFromUID, extractEmployeesFromStream
+from aerp.database.utils.userDataValidity import testAllInput
+from aerp.database.utils.detailsExtraction import getAllDocs, extractFields, extractEmployeesFromStream
 
 from firebase_admin import firestore
 from typing import Any, Dict, List
@@ -63,7 +62,17 @@ class Manager(Base):
         Get all employees under a particular manager
         """
         employees = self.managerData["employees"]
-        return extractEmployeesFromUID(self.database, employees=employees)
+        employeesList = []
+        increment = 10
+        employeeCounter = 0
+        while(employeeCounter >= len(employees)):
+            employeeData = self.database.where("uid", "in", employees[employeeCounter:employeeCounter+increment])\
+                                        .stream()
+            fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
+                         "role", "team_id", "is_manager", "manager_id", "manager_name", "salary"]
+            employeesList.extend(extractEmployeesFromStream(employees=employeeData, fields=fieldList))
+            employeeCounter += increment
+        return employeesList
 
     def getAllJrManagers(self) -> List[Dict[str, Any]]:
         """
@@ -139,3 +148,29 @@ class Manager(Base):
                             "manager_id": "",
                             "manager_name": ""})
         self.document.update({"employees": firestore.ArrayRemove(userID)})
+    
+    def markTransaction(self, userID: str, transaction: Dict[str, Any]):
+        employeeDoc = self.database.document(userID)
+        transactionDict = {
+            "date": transaction["date"],
+            "description": transaction["description"],
+            "amount": transaction["amount"],
+            "type": transaction["type"]
+        }
+        employeeDoc.update({"payments": firestore.ArrayUnion(userID)})
+    
+    def filters(self, name: str="", teamID: str="", role: str="", email: str=""):
+        query = self.database
+        if name != "":
+            query = query.where("name", "==", name)
+        if email != "":
+            query = query.where("email", "==", email)
+        if role != "":
+            query = query.where("role", "==", role)
+        if teamID != "":
+            query = query.where("teamID", "==", teamID)
+        
+        users = query.stream()
+        fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
+                     "role", "team_id", "is_manager", "manager_id", "manager_name", "salary"]
+        return extractEmployeesFromStream(employees=users, fields=fieldList)
