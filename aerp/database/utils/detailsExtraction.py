@@ -1,21 +1,8 @@
-from firebase_admin import firestore
-from typing import Any, Dict, List, Generator
+from typing import Any, Dict, List
 
 def extractFields(data: Dict[str, Any], fields: List[str], returnEmpty: bool = True) -> Dict[str, Any]:
     """
     Extracts the Listed Params from the dict
-
-    Parameters
-    ----------
-    data: Dict[str, Any]
-        The data to extract fields from
-    fields: List[str]
-        The list of fields whose data is to be extracted
-
-    Return
-    ------
-    Dict[str, Any]
-        Extracted Data
     """
     cleanedData = {}
     for field in fields:
@@ -26,7 +13,7 @@ def extractFields(data: Dict[str, Any], fields: List[str], returnEmpty: bool = T
 
     return cleanedData
 
-def extractEmployeesFromStream(employees: Generator, fields: List[str]) -> List[Dict[str, Any]]:
+def extractEmployeesFromStream(employees: Any, fields: List[str]) -> List[Dict[str, Any]]:
     """
     Extract employees from a Stream
     """
@@ -37,7 +24,7 @@ def extractEmployeesFromStream(employees: Generator, fields: List[str]) -> List[
 
     return employeesList
 
-def getAllDocs(docs: Generator) -> List[Dict[str, Any]]:
+def getAllDocs(docs: Any) -> List[Dict[str, Any]]:
     docsList = []
     for doc in docs:
         docDict = doc.to_dict()

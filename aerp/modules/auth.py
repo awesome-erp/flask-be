@@ -1,9 +1,9 @@
 from datetime import timedelta
 from firebase_admin import auth
-from flask import Blueprint, make_response, request, wrappers
+from flask import Blueprint, request, wrappers
 
 from aerp.database.models.User import User
-from aerp.utils.auth import checkPermission
+from aerp.utils.authorization import checkPermission
 from aerp.utils.responses import success, failure
 
 authorization = Blueprint("auth", __name__, static_folder='/static')
@@ -40,7 +40,6 @@ def set_user_data() -> wrappers.Response:
     Route to set user data for 1st time
     """
     payload = request.json
-    accessToken = request.cookies.get("accessToken")
     try:
         authClaims = checkPermission(request)
     except Exception:

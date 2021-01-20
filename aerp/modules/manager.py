@@ -1,8 +1,7 @@
-from firebase_admin import auth
-from flask import Blueprint, make_response, request, wrappers
+from flask import Blueprint, request, wrappers
 
 from aerp.database.models.Manager import Manager
-from aerp.utils.auth import checkPermission
+from aerp.utils.authorization import checkPermission
 from aerp.utils.responses import success, failure
 
 manager = Blueprint("manager", __name__, static_folder='/static')
@@ -79,7 +78,7 @@ def add_manager(employee_id: str, manager_id: str) -> wrappers.Response:
     return success(code=200) if managerAdded is True else failure(code=400)
 
 @manager.route("/mark/<string:requestType>", methods=['POST'])  # type: ignore
-def mark_leave(requestType: str) -> wrappers.Response:
+def mark_request(requestType: str) -> wrappers.Response:
     payload = request.json
     try:
         authClaims = checkPermission(request)
@@ -90,7 +89,7 @@ def mark_leave(requestType: str) -> wrappers.Response:
     return success(code=200)
 
 @manager.route("/get/<string:requestType>/<string:markedAs>", methods=['GET'])  # type: ignore
-def get_leave(requestType: str, markedAs: str) -> wrappers.Response:
+def get_request(requestType: str, markedAs: str) -> wrappers.Response:
     try:
         authClaims = checkPermission(request)
         manager = Manager(authClaims["uid"])
@@ -104,7 +103,7 @@ def get_leave(requestType: str, markedAs: str) -> wrappers.Response:
     return success(requestType, reqs, 200)
 
 @manager.route("/transaction/<string:userId>", methods=['POST'])  # type: ignore
-def get_leave(userID: str) -> wrappers.Response:
+def transaction(userID: str) -> wrappers.Response:
     payload = request.json
     try:
         authClaims = checkPermission(request)
@@ -115,7 +114,7 @@ def get_leave(userID: str) -> wrappers.Response:
     return success(code=200)
 
 @manager.route("/filter", methods=['POST'])  # type: ignore
-def get_leave(userID: str) -> wrappers.Response:
+def filters(userID: str) -> wrappers.Response:
     payload = request.json
     try:
         authClaims = checkPermission(request)

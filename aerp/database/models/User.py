@@ -3,7 +3,7 @@ from aerp.database.utils.userDataValidity import testAllInput
 from aerp.database.utils.detailsExtraction import getAllDocs, extractFields
 
 from firebase_admin import firestore
-from typing import Any, Dict
+from typing import Any, Dict, List
 import random
 import string
 
@@ -100,9 +100,10 @@ class User(Base):
         leaveDoc.set(leave)
 
     def createLoanRaiseRequest(self, details: Dict[str, str]) -> None:
-        loanRaiseID = self.uid + "-" + ''.join(random.choice(string.ascii_uppercase
-                                                         + string.ascii_lowercase
-                                                         + string.digits) for _ in range(10))
+        loanRaiseID = self.uid + "-" + ''.join(random.choice
+                                               (string.ascii_uppercase
+                                                + string.ascii_lowercase
+                                                + string.digits) for _ in range(10))
         user = self.userDocument.get().to_dict()
         loanRaiseDoc = self.requests_database.document(loanRaiseID)
         loanRaise = {"id": loanRaiseID,
@@ -117,13 +118,13 @@ class User(Base):
                      "marked_by_name": "",
                      "marked_by_email": "",
                      "description": details["description"]}
-        loanRaiseDoc.set(leave)
+        loanRaiseDoc.set(loanRaise)
 
-    def getRequests(self, reqType: str, markedAs: str):
+    def getRequests(self, reqType: str, markedAs: str) -> List[Dict[str, Any]]:
         reqs = self.requests_database.where("type", "==", reqType)\
                                      .where("creator_id", "==", self.uid)\
                                      .where("marked_as", "==", markedAs)\
                                      .order_by("created", direction = firestore.Query.DESCENDING)\
                                      .stream()
 
-        return getAllDocs(leaves)
+        return getAllDocs(reqs)

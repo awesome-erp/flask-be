@@ -17,6 +17,7 @@ class Manager(Base):
         self.uid = uid
         self.document = self.database.document(self.uid)
         self.managerData = self.document.get().to_dict()
+        print(type(self.document.get()))
         if self.managerData["is_manager"] is not True:
             raise Exception("User Not a Manager")
 
@@ -148,8 +149,8 @@ class Manager(Base):
                             "manager_id": "",
                             "manager_name": ""})
         self.document.update({"employees": firestore.ArrayRemove(userID)})
-    
-    def markTransaction(self, userID: str, transaction: Dict[str, Any]):
+
+    def markTransaction(self, userID: str, transaction: Dict[str, Any]) -> None:
         employeeDoc = self.database.document(userID)
         transactionDict = {
             "date": transaction["date"],
@@ -157,9 +158,9 @@ class Manager(Base):
             "amount": transaction["amount"],
             "type": transaction["type"]
         }
-        employeeDoc.update({"payments": firestore.ArrayUnion(userID)})
-    
-    def filters(self, name: str="", teamID: str="", role: str="", email: str=""):
+        employeeDoc.update({"payments": firestore.ArrayUnion(transactionDict)})
+
+    def filters(self, name: str = "", teamID: str = "", role: str = "", email: str = "") -> List[Dict[str, Any]]:
         query = self.database
         if name != "":
             query = query.where("name", "==", name)
@@ -169,7 +170,7 @@ class Manager(Base):
             query = query.where("role", "==", role)
         if teamID != "":
             query = query.where("teamID", "==", teamID)
-        
+
         users = query.stream()
         fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
                      "role", "team_id", "is_manager", "manager_id", "manager_name", "salary"]

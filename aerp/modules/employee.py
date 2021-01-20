@@ -1,8 +1,7 @@
-from firebase_admin import auth
-from flask import Blueprint, make_response, request, wrappers
+from flask import Blueprint, request, wrappers
 
 from aerp.database.models.User import User
-from aerp.utils.auth import checkPermission
+from aerp.utils.authorization import checkPermission
 from aerp.utils.responses import success, failure
 
 employee = Blueprint("employee", __name__, static_folder='/static')
@@ -52,11 +51,10 @@ def create_loan_raise_request() -> wrappers.Response:
 
 @employee.route("/<string:reqType>/<string:markedAs>", methods=['GET'])  # type: ignore
 def get_leave(reqType: str, markedAs: str) -> wrappers.Response:
-    accessToken = request.cookies.get("accessToken")
     try:
         authClaims = checkPermission(request)
     except Exception:
         return failure(code=401)
     user = User(authClaims["uid"])
-    leaves = user.getRequests(reqType=requestType, markedAs=markedAs)
-    return success("leaves", leaves, 200)
+    req = user.getRequests(reqType=reqType, markedAs=markedAs)
+    return success(reqType, req, 200)
