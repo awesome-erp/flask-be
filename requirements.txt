@@ -4,3 +4,4 @@ mypy==0.770
 flake8
 -e git+https://github.com/zulip/zulint@639c0d34c23ac559ef0f7b9510cf95f73f6d0eb9#egg=zulint==1.0.0
 cryptography
+gunicorn
