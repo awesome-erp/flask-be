@@ -54,7 +54,7 @@ def set_user_data() -> wrappers.Response:
 @authorization.route("/sign-out", methods=['GET'])  # type: ignore
 def remCookie() -> wrappers.Response:
     """
-    Remove the HTTP only coocie for login
+    Remove the HTTP only cookie for login
     """
     response = success(code=200)
     response.set_cookie('accessToken', '', expires=0, secure=True,

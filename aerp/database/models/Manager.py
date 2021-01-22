@@ -4,6 +4,7 @@ from aerp.database.utils.detailsExtraction import getAllDocs, extractFields, ext
 
 from firebase_admin import firestore
 from typing import Any, Dict, List
+import os
 
 class Manager(Base):
     """
@@ -18,7 +19,7 @@ class Manager(Base):
         self.document = self.database.document(self.uid)
         self.managerData = self.document.get().to_dict()
         print(type(self.document.get()))
-        if self.managerData["is_manager"] is not True:
+        if self.managerData["is_manager"] is not True and os.environ.get("ADMIN_EMAIL") != self.managerData["email"]:
             raise Exception("User Not a Manager")
 
     def getPendingRequests(self, reqType: str) -> List[Dict[str, Any]]:
@@ -66,7 +67,7 @@ class Manager(Base):
         employeesList = []
         increment = 10
         employeeCounter = 0
-        while(employeeCounter >= len(employees)):
+        while(employeeCounter < len(employees)):
             employeeData = self.database.where("uid", "in", employees[employeeCounter:employeeCounter+increment])\
                                         .stream()
             fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
@@ -138,6 +139,7 @@ class Manager(Base):
         to as self
         """
         employeeDoc = self.database.document(userID)
+        employeeDict = employeeDoc.get().to_dict()
         employeeDoc.update({"salary": 0.0,
                             "is_manager": False,
                             "employees": [],
@@ -145,10 +147,13 @@ class Manager(Base):
                             "manager_id": "",
                             "manager_email": "",
                             "manager_name": "",
-                            "role": "",
-                            "manager_id": "",
-                            "manager_name": ""})
+                            "role": ""})
         self.document.update({"employees": firestore.ArrayRemove(userID)})
+        for empID in employeeDict["employees"]:
+            self.database.document(empID)\
+                         .update({"manager_id": self.managerData["user_id"],
+                                  "manager_email": self.managerData["email"],
+                                  "manager_name": self.managerData["name"]})
 
     def markTransaction(self, userID: str, transaction: Dict[str, Any]) -> None:
         employeeDoc = self.database.document(userID)

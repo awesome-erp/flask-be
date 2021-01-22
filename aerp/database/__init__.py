@@ -2,7 +2,7 @@ from firebase_admin import firestore, credentials, initialize_app
 import os
 import json
 
-if os.environ["AERP_FIREBASE_CONFIG"]:
+if os.environ.get("AERP_FIREBASE_CONFIG") is not None:
     creds_dict = json.loads(os.environ["AERP_FIREBASE_CONFIG"])
     db_credentials = credentials.Certificate(creds_dict)
 else:
