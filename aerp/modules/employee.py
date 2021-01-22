@@ -9,7 +9,7 @@ employee = Blueprint("employee", __name__, static_folder='/static')
 @employee.route("/info", methods=['GET'])  # type: ignore
 def info() -> wrappers.Response:
     """
-    Get User Info 
+    Get User Info
 
     Output on Success: 200
     ----------------------
@@ -29,13 +29,13 @@ def info() -> wrappers.Response:
         "manager_name": "MAN NAME",
         "manager_email": "mana@email.com",
         "payments": [
-            { 
+            {
                 "date": "yyyy-mm-dd",
                 "description": "Some random Payment",
                 "amount": 101.00,
                 "type": "Debit"
             },
-            { 
+            {
                 "date": "yyyy-mm-dd",
                 "description": "Some other random Payment",
                 "amount": 10.00,
@@ -125,7 +125,7 @@ def create_loan_raise_request() -> wrappers.Response:
 @employee.route("/<string:reqType>/<string:markedAs>", methods=['GET'])  # type: ignore
 def get_request(reqType: str, markedAs: str) -> wrappers.Response:
     """
-    Get the details of the request 
+    Get the details of the request
 
     URL_PARAMS
     ----------

@@ -109,7 +109,6 @@ class Manager(Base):
                                                      "manager_name": ""})
 
     def assignOtherManager(self, manager_uid: str, employee_uid: str) -> bool:
-        print(manager_uid,employee_uid)
         employees = set(self.managerData["employees"])
         managerData = self.database.document(manager_uid).get().to_dict()
         if manager_uid in employees and employee_uid in employees:
@@ -167,14 +166,15 @@ class Manager(Base):
 
     def filters(self, name: str = "", teamID: str = "", role: str = "", email: str = "") -> List[Dict[str, Any]]:
         query = self.database
-        if name != "":
-            query = query.where("name", "==", name)
         if email != "":
             query = query.where("email", "==", email)
-        if role != "":
-            query = query.where("role", "==", role)
-        if teamID != "":
-            query = query.where("teamID", "==", teamID)
+        else:
+            if name != "":
+                query = query.where("name", "==", name)
+            if role != "":
+                query = query.where("role", "==", role)
+            if teamID != "":
+                query = query.where("teamID", "==", teamID)
 
         users = query.stream()
         fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
