@@ -87,11 +87,12 @@ def add_manager(employee_id: str, manager_id: str) -> wrappers.Response:
         manager = Manager(authClaims["uid"])
     except Exception:
         return failure(code=401)
+    print(employee_id, manager_id)
     managerAdded = manager.assignOtherManager(employee_uid=employee_id, manager_uid=manager_id)
     return success(code=200) if managerAdded is True else failure(code=400)
 
-@manager.route("/mark/<string:requestType>", methods=['POST'])  # type: ignore
-def mark_request(requestType: str) -> wrappers.Response:
+@manager.route("/mark/", methods=['POST'])  # type: ignore
+def mark_request() -> wrappers.Response:
     payload = request.json
     try:
         authClaims = checkPermission(request)

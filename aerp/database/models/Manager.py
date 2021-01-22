@@ -26,14 +26,14 @@ class Manager(Base):
         reqs = self.requests_database.where("type", "==", reqType)\
                                      .where("creator_id", "in", employees)\
                                      .where("marked_as", "==", "pending")\
-                                     .order_by("leave_created", direction=firestore.Query.DESCENDING).stream()
+                                     .order_by("created", direction=firestore.Query.DESCENDING).stream()
         return getAllDocs(reqs)
 
     def getMarkedRequests(self, reqType: str, markedAs: str) -> List[Dict[str, Any]]:
         reqs = self.requests_database.where("type", "==", reqType)\
                                      .where("marked_by_uid", "==", self.uid)\
                                      .where("marked_as", "==", markedAs)\
-                                     .order_by("leave_created", direction=firestore.Query.DESCENDING).stream()
+                                     .order_by("created", direction=firestore.Query.DESCENDING).stream()
         return getAllDocs(reqs)
 
     def markRequest(self, reqID: str, marked: str) -> None:
@@ -67,7 +67,7 @@ class Manager(Base):
         increment = 10
         employeeCounter = 0
         while(employeeCounter < len(employees)):
-            employeeData = self.database.where("uid", "in", employees[employeeCounter:employeeCounter+increment])\
+            employeeData = self.database.where("user_id", "in", employees[employeeCounter:employeeCounter+increment])\
                                         .stream()
             fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
                          "role", "team_id", "is_manager", "manager_id", "manager_name", "salary", "payments"]
@@ -83,8 +83,8 @@ class Manager(Base):
         employeesList = []
         increment = 10
         employeeCounter = 0
-        while(employeeCounter >= len(employees)):
-            employeeData = self.database.where("uid", "in", employees[employeeCounter:employeeCounter+increment])\
+        while(employeeCounter < len(employees)):
+            employeeData = self.database.where("user_id", "in", employees[employeeCounter:employeeCounter+increment])\
                                         .where("is_manager", "==", True)\
                                         .stream()
             fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
@@ -109,6 +109,7 @@ class Manager(Base):
                                                      "manager_name": ""})
 
     def assignOtherManager(self, manager_uid: str, employee_uid: str) -> bool:
+        print(manager_uid,employee_uid)
         employees = set(self.managerData["employees"])
         managerData = self.database.document(manager_uid).get().to_dict()
         if manager_uid in employees and employee_uid in employees:

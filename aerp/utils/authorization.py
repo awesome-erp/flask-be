@@ -1,15 +1,15 @@
 from firebase_admin import auth
-from flask import wrappers
+from flask.wrappers import Request
 from typing import Dict, Optional
 
-def _cookieValid(request: wrappers.Request) -> Optional[str]:
+def _cookieValid(request: Request) -> Optional[str]:
     return request.cookies.get("accessToken")
 
-def _authorizationHeader(request: wrappers.Request) -> Optional[str]:
+def _authorizationHeader(request: Request) -> Optional[str]:
     """method to extract token from the Authorization header"""
     return request.headers['authorization'].split(" ")[-1].strip()
 
-def checkPermission(request: wrappers.Request) -> Dict[str, str]:
+def checkPermission(request: Request) -> Dict[str, str]:
     token = _cookieValid(request)
     if not token:
         token = _authorizationHeader(request)
