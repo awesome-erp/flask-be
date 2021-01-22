@@ -107,7 +107,7 @@ class User(Base):
         user = self.userDocument.get().to_dict()
         loanRaiseDoc = self.requests_database.document(loanRaiseID)
         loanRaise = {"id": loanRaiseID,
-                     "type": details["type"],
+                     "type": details["type"].lower(),
                      "creator_name": user["name"],
                      "creator_id": self.uid,
                      "creator_email": user["email"],

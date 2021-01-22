@@ -8,6 +8,19 @@ manager = Blueprint("manager", __name__, static_folder='/static')
 
 @manager.route("/update-employee-data", methods=['POST'])  # type: ignore
 def update_employee_data() -> wrappers.Response:
+    """
+    Update the data that is only accessable to manager
+
+    Input Expected(All Optional)
+    ----------------------------
+    {
+        "name": "Name Name",
+        "dob": "yyyy-mm-dd",
+        "phone": "+100 1001001001",
+        "email": "abc@email.com",
+        "personal_email": "abc@mail.com"
+    }
+    """
     payload = request.json
     try:
         authClaims = checkPermission(request)

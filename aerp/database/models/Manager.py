@@ -18,7 +18,6 @@ class Manager(Base):
         self.uid = uid
         self.document = self.database.document(self.uid)
         self.managerData = self.document.get().to_dict()
-        print(type(self.document.get()))
         if self.managerData["is_manager"] is not True and os.environ.get("ADMIN_EMAIL") != self.managerData["email"]:
             raise Exception("User Not a Manager")
 
@@ -71,7 +70,7 @@ class Manager(Base):
             employeeData = self.database.where("uid", "in", employees[employeeCounter:employeeCounter+increment])\
                                         .stream()
             fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
-                         "role", "team_id", "is_manager", "manager_id", "manager_name", "salary"]
+                         "role", "team_id", "is_manager", "manager_id", "manager_name", "salary", "payments"]
             employeesList.extend(extractEmployeesFromStream(employees=employeeData, fields=fieldList))
             employeeCounter += increment
         return employeesList
@@ -89,7 +88,7 @@ class Manager(Base):
                                         .where("is_manager", "==", True)\
                                         .stream()
             fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
-                         "role", "team_id", "is_manager", "manager_id", "manager_name", "salary"]
+                         "role", "team_id", "is_manager", "manager_id", "manager_name", "salary", "payments"]
             employeesList.extend(extractEmployeesFromStream(employees=employeeData, fields=fieldList))
             employeeCounter += increment
         return employeesList
@@ -178,5 +177,5 @@ class Manager(Base):
 
         users = query.stream()
         fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
-                     "role", "team_id", "is_manager", "manager_id", "manager_name", "salary"]
+                     "role", "team_id", "is_manager", "manager_id", "manager_name", "salary", "payments"]
         return extractEmployeesFromStream(employees=users, fields=fieldList)
