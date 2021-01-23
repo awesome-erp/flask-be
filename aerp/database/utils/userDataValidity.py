@@ -1,10 +1,12 @@
 from typing import Dict, Any, Tuple
 from datetime import datetime
+import re
 
 
 def checkName(name: str) -> bool:
     """
     Checks if a string is a valid name
+    Only spaces and alphabets allowed
 
     Parameters
     ----------
@@ -17,10 +19,10 @@ def checkName(name: str) -> bool:
         True/False according to the validity of the name
     """
 
-    return type(name) == str
+    return type(name) == str and bool(re.match(r'[a-zA-Z\s]+$', name))
 
 
-def checkDOB(dob: str) -> bool:
+def checkDate(date: str) -> bool:
     """
     Checks if a string is a valid dob
 
@@ -34,14 +36,40 @@ def checkDOB(dob: str) -> bool:
     bool
         True/False according to the validity of the dob
     """
-    if not type(dob) == str:
+    if not type(date) == str:
         return False
     try:
-        datetime.strptime(dob, "%Y-%m-%d")
+        datetime.strptime(date, "%Y-%m-%d")
     except Exception:
         return False
-
     return True
+
+def compareDates(date1: str, date2: str) -> Tuple[bool, str]:
+    """
+    Checks if a string is a valid dob
+
+    Parameters
+    ----------
+    dob: str
+        The name to be Tested
+
+    Returns
+    -------
+    Tuple(bool, str)
+        True/False according to the validity of the dates
+        "<"|">"|"="|"Error" is the sign between 1st and 2nd date
+    """
+    if checkDate(date1) and checkDate(date2):
+        dateObj1 = datetime.strptime(date1, "%Y-%m-%d")
+        dateObj2 = datetime.strptime(date2, "%Y-%m-%d")
+        if dateObj1 > dateObj2:
+            return (True, ">")
+        elif dateObj1 < dateObj2:
+            return (True, "<")
+        else:
+            return (True, "=")
+    else:
+        return (False, "Error")
 
 
 def checkEmail(email: str) -> bool:
@@ -59,12 +87,13 @@ def checkEmail(email: str) -> bool:
         True/False according to the validity of the email
     """
 
-    return type(email) == str
+    return type(email) == str and bool(re.match(r'^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$', email))
 
 
 def checkPhone(phone: str) -> bool:
     """
     Checks if a phone number is valid
+    Expected Countrycode<space>Number +91 12345678901
 
     Parameters
     ----------
@@ -77,7 +106,7 @@ def checkPhone(phone: str) -> bool:
         True/False according to the validity of the phone number
     """
 
-    return type(phone) == str
+    return type(phone) == str and phone.split()[-1].isnumeric()
 
 
 def testAllInput(Inputs: Dict[str, Any]) -> Tuple[bool, str]:
@@ -104,7 +133,7 @@ def testAllInput(Inputs: Dict[str, Any]) -> Tuple[bool, str]:
         if not checkName(Inputs["name"]):
             return (False, "name")
     if "dob" in Inputs:
-        if not checkDOB(Inputs["dob"]):
+        if not checkDate(Inputs["dob"]):
             return (False, "dob")
     if "phone" in Inputs:
         if not checkPhone(Inputs["phone"]):

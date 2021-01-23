@@ -1,5 +1,5 @@
 from aerp.database.models.BaseModel import Base
-from aerp.database.utils.userDataValidity import testAllInput
+from aerp.database.utils.userDataValidity import testAllInput, compareDates
 from aerp.database.utils.detailsExtraction import getAllDocs, extractFields
 
 from firebase_admin import firestore
@@ -84,6 +84,12 @@ class User(Base):
                                                          + string.digits) for _ in range(10))
         user = self.userDocument.get().to_dict()
         leaveDoc = self.requests_database.document(leaveID)
+        createDateComp = compareDates(leaveInput["leaveCreated"], leaveInput["leaveStart"])
+        startendDateComp = compareDates(leaveInput["leaveStart"], leaveInput["leaveEnd"])
+        if createDateComp != (True, "<"):
+            raise Exception("Leave Must start after Current date")
+        if startendDateComp != (True, ">") or startendDateComp != (True, "="):
+            raise Exception("Leave Must start before end date")
         leave = {"leave_id": leaveID,
                  "type": "leave",
                  "creator_name": user["name"],

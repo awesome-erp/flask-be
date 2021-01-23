@@ -96,7 +96,10 @@ def create_leave() -> wrappers.Response:
     except Exception:
         return failure(code=401)
     user = User(authClaims["uid"])
-    user.createLeaveRequest(payload)
+    try:
+        user.createLeaveRequest(payload)
+    except Exception as e:
+        return failure("error", e, code=401)
     return success(code=200)
 
 @employee.route("/create-loan-raise-request", methods=['POST'])  # type: ignore
