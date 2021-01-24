@@ -10,39 +10,6 @@ employee = Blueprint("employee", __name__, static_folder='/static')
 def info() -> wrappers.Response:
     """
     Get User Info
-
-    Output on Success: 200
-    ----------------------
-    {
-        "user_id": "User ID",
-        "name": "Name Name",
-        "dob": "yyyy-mm-dd",
-        "phone": "+100 1001001001",
-        "email": "abc@email.com",
-        "personal_email": "abc@mail.com",
-        "role": "SDE1",
-        "team_id": "MY TEAM",
-        "team_name": "MY TEAM NAME",
-        "salary": 101.00,
-        "is_manager": True,
-        "manager_id": "MAN ID",
-        "manager_name": "MAN NAME",
-        "manager_email": "mana@email.com",
-        "payments": [
-            {
-                "date": "yyyy-mm-dd",
-                "description": "Some random Payment",
-                "amount": 101.00,
-                "type": "Debit"
-            },
-            {
-                "date": "yyyy-mm-dd",
-                "description": "Some other random Payment",
-                "amount": 10.00,
-                "type": "Credit"
-            }
-        ]
-    }
     """
     try:
         authClaims = checkPermission(request)
@@ -56,16 +23,6 @@ def info() -> wrappers.Response:
 def update_data() -> wrappers.Response:
     """
     Update the data that is only accessable to user
-
-    Input Expected(All Optional)
-    ----------------------------
-    {
-        "name": "Name Name",
-        "dob": "yyyy-mm-dd",
-        "phone": "+100 1001001001",
-        "email": "abc@email.com",
-        "personal_email": "abc@mail.com"
-    }
     """
     payload = request.json
     try:

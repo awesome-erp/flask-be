@@ -68,6 +68,23 @@ Deployment
 -   Clone the repository `git clone https://github.com/awesome-erp/flask-be.git`
 -   Install Dependencies `pip install -r requirements.txt`
 -   Run Server from `app` in `main.py` Eg `python main.py`
+-   Add the Following Environment variables:
+    ```
+    AERP_FIREBASE_CONFIG = "{
+        "type": "dummy",
+        "project_id": "dummy",
+        "private_key_id": "dummy",
+        "private_key": "dummy",
+        "client_email": "dummy",
+        "client_id": "dummy",
+        "auth_uri": "dummy",
+        "token_uri": "dummy",
+        "auth_provider_x509_cert_url": "dummy",
+        "client_x509_cert_url": "dummy"
+    }"
+
+    ADMIN_EMAIL = "dummy@email.com"
+    ```
 
 Development
 -----------
@@ -82,6 +99,7 @@ Development
 -   Run Server `python3 main.py`<br>
     Good to Go:------------>
 -   Make sure to run `./tools/lint` and get the tests passed before making commits
+-   Contact for firebase_server.json at dganguly1120@gmail.com
 
 For More Docs:
 
