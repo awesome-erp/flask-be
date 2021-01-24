@@ -112,8 +112,8 @@ class Manager(Base):
         employees = set(self.managerData["employees"])
         managerData = self.database.document(manager_uid).get().to_dict()
         if (manager_uid in employees or manager_uid == self.uid):
-            self.database.document(manager_uid).update({"employees": firestore.ArrayUnion([employee_uid])})
             self.document.update({"employees": firestore.ArrayRemove([employee_uid])})
+            self.database.document(manager_uid).update({"employees": firestore.ArrayUnion([employee_uid])})
             self.database.document(employee_uid).update({"manager_id": managerData["user_id"],
                                                          "manager_email": managerData["email"],
                                                          "manager_name": managerData["name"]})

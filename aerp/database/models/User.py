@@ -3,6 +3,7 @@ from aerp.database.utils.userDataValidity import testAllInput, compareDates
 from aerp.database.utils.detailsExtraction import getAllDocs, extractFields
 
 from firebase_admin import firestore
+import os
 from typing import Any, Dict, List
 import random
 import string
