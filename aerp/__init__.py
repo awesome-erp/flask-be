@@ -10,7 +10,7 @@ def create_app() -> object:
     Create Flask App
     """
     app = Flask(__name__)
-    origins = "http://localhost:4200"
+    origins = "*"
     CORS(app,
          origins=origins,
          expose_headers='Authorization',
