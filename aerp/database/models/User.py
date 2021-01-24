@@ -88,7 +88,7 @@ class User(Base):
         startendDateComp = compareDates(leaveInput["leaveStart"], leaveInput["leaveEnd"])
         if createDateComp != (True, "<"):
             raise Exception("Leave Must start after Current date")
-        if startendDateComp != (True, ">") or startendDateComp != (True, "="):
+        if startendDateComp != (True, ">") and startendDateComp != (True, "="):
             raise Exception("Leave Must start before end date")
         leave = {"leave_id": leaveID,
                  "type": "leave",
