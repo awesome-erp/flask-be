@@ -4,5 +4,5 @@ Routes
 /auth
 -----
 """
-Contains Routes Related to the 
+Contains Routes Related to the
 """
