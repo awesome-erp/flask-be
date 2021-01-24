@@ -21,6 +21,7 @@ class User(Base):
         self.userDocument = self.database.document(self.uid)
 
     def setData(self, data: Dict[str, Any]) -> None:
+        is_manager = True if os.environ.get("ADMIN_EMAIL") == data["email"] else False
         userData = {
             "user_id": self.uid,
             "name": data["name"],
@@ -34,7 +35,7 @@ class User(Base):
             "role": "",
             "team_id": "",
             "team_name": "",
-            "is_manager": False,
+            "is_manager": is_manager,
             "is_team_lead": False,
             "is_admin": False,
             "employees": [],

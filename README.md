@@ -24,9 +24,9 @@ Project Structure
 
 ```
 ║
-╠══ aerp [The Main Project Directory] 
+╠══ aerp [The Main Project Directory]
 ║   ╠══ database [For all Database Utilities and Interactions]
-║   ║   ╠══ models 
+║   ║   ╠══ models
 ║   ║   ║   ╠══ BaseModel.py [Prototype of a Model]
 ║   ║   ║   ╠══ Manager.py [Manager Level Functionalities]
 ║   ║   ║   ╚══ User.py [User Level Functionalities]
@@ -36,16 +36,16 @@ Project Structure
 ║   ║   ║   ╚══ userDataValidity.py [Functions to Check Validity of Different Inputs to database]
 ║   ║   ║
 ║   ║   ╚══ __init__.py [Initialize the database]
-║   ║   
+║   ║
 ║   ╠══ modules [For Blueprints of Routes]
 ║   ║   ╠══ auth.py [Routes delivering Authentication Utilities]
 ║   ║   ╠══ employee.py [Routes delivering Employee Level Utilities]
 ║   ║   ╚══ manager.py [Routes delivering Manager Level Utilities]
-║   ║   
+║   ║
 ║   ╠══ utils [General Purpose Utils]
 ║   ║   ╠══ authorization.py [Functions Handling Auth Tokens]
 ║   ║   ╚══ responses.py [Predefined Response Types]
-║   ║   
+║   ║
 ║   ╚══ __init__.py [Initialize the App]
 ║
 ╠══ tools [The Utilities related to Deployment and Tests]
@@ -76,7 +76,7 @@ Development
 -   Clone the Fork `git clone https://github.com/`Github-User-Name`/flask-be.git`
 -   Set upstream `git remote add upstream https://github.com/awesome-erp/flask-be.git`
 -   Setup Environment `./tools/set-env`
--   Activate virtualenv 
+-   Activate virtualenv
     -   Linux/OS X: `Source venv-awesome-erp/bin/activate`
     -   Windows WSL: `Source venv-awesome-erp/Scripts/activate`
 -   Run Server `python3 main.py`<br>
