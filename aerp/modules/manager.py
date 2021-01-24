@@ -87,7 +87,6 @@ def add_manager(employee_id: str, manager_id: str) -> wrappers.Response:
         manager = Manager(authClaims["uid"])
     except Exception:
         return failure(code=401)
-    print(employee_id, manager_id)
     managerAdded = manager.assignOtherManager(employee_uid=employee_id, manager_uid=manager_id)
     return success(code=200) if managerAdded is True else failure(code=400)
 
@@ -117,18 +116,18 @@ def get_request(requestType: str, markedAs: str) -> wrappers.Response:
     return success(requestType, reqs, 200)
 
 @manager.route("/transaction/<string:userId>", methods=['POST'])  # type: ignore
-def transaction(userID: str) -> wrappers.Response:
+def transaction(userId: str) -> wrappers.Response:
     payload = request.json
     try:
         authClaims = checkPermission(request)
         manager = Manager(authClaims["uid"])
     except Exception:
         return failure(code=401)
-    manager.markTransaction(userID=userID, transaction=payload)
+    manager.markTransaction(userID=userId, transaction=payload)
     return success(code=200)
 
 @manager.route("/filter", methods=['POST'])  # type: ignore
-def filters(userID: str) -> wrappers.Response:
+def filters() -> wrappers.Response:
     payload = request.json
     try:
         authClaims = checkPermission(request)

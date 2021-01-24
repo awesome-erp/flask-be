@@ -162,7 +162,7 @@ class Manager(Base):
             "amount": transaction["amount"],
             "type": transaction["type"]
         }
-        employeeDoc.update({"payments": firestore.ArrayUnion(transactionDict)})
+        employeeDoc.update({"payments": firestore.ArrayUnion([transactionDict])})
 
     def filters(self, name: str = "", teamID: str = "", role: str = "", email: str = "") -> List[Dict[str, Any]]:
         query = self.database
@@ -174,7 +174,7 @@ class Manager(Base):
             if role != "":
                 query = query.where("role", "==", role)
             if teamID != "":
-                query = query.where("teamID", "==", teamID)
+                query = query.where("team_id", "==", teamID)
 
         users = query.stream()
         fieldList = ["name", "dob", "phone", "email", "personal_email", "user_id", "manager_email",
