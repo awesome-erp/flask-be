@@ -1,4 +1,4 @@
-Awesome-ERP Backend([Click Here](https://github.com/awesome-erp/flask-be))
+Awesome-ERP Backend([Click Here](http://awesome-erp.herokuapp.com/))
 ===============================
 <p>
 <img width="30%" style="padding: 5%; display: inline-block" src="/assets/aerp-color.svg">
